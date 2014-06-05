@@ -272,10 +272,10 @@ int main(int argc, char **argv)
 
         if(robot_init)
         {
-            ros::Duration(6).sleep();
+            //ros::Duration(6).sleep();
             
             say("Hello World. My name is S and T Enterprise. Please press the EX box button to connect");
-            ros::Duration(12).sleep();
+            //ros::Duration(12).sleep();
             robot_init = false;
         }
         if(mode_ ==standby)
@@ -345,7 +345,7 @@ void change_mode(Mode new_mode)
     if (mode_ == standby)
     {
         ROS_INFO("Control: Standby Mode");
-        say("Enterprise standing by");  
+        //say("Enterprise standing by");  
     }
     
 
@@ -353,7 +353,7 @@ void change_mode(Mode new_mode)
     {
         ROS_INFO("Control: Autonomous Mode");
         
-        say("Intializing autonomous navigation");
+        //say("Intializing autonomous navigation");
         
     }
     
@@ -362,8 +362,8 @@ void change_mode(Mode new_mode)
         ROS_INFO("Control: Xbox Mode");
         
         
-        say("Controller Mode Initialized");
-        say("Enterprise at your command");
+       // say("Controller Mode Initialized");
+       // say("Enterprise at your command");
     }
 }
 void say(std::string say)

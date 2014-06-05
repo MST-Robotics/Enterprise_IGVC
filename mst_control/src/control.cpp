@@ -168,6 +168,50 @@ void navigation_callback(const geometry_msgs::Twist twist)
         nav_twist.angular.y = 0;  
         nav_twist.angular.z = twist.angular.z;
         nav_twist.linear.x = twist.linear.x;
+ros::NodeHandle nh;
+int leftVel, rightVel, leftDir, rightDir;
+/*******************************************************************************
+* Constants
+*******************************************************************************/
+const float ROBOT_RAD  = 0.28; //meters
+const float WHEEL_RAD  = 0.20; //meters
+const float GEAR_RATIO = 21.952;    //don't know
+const int   MAX_PUB    = 256;  //This is the max value that can be published
+
+//Callback from twist which gets a linear and angular velocity 
+void TwistCallback(const geometry_msgs::Twist &msg)
+{
+  //taking subscribed messages from Twist  
+  angularVel = msg.angular.z;
+  linearVel = msg.linear.x;
+  return;
+} 
+
+const float TURNS_PER_SEC = GEAR_RATIO / (2.0 * WHEEL_RAD * M_PI);
+const float TURN_OFFSET = TURNS_PER_SEC * ROBOT_RAD;
+
+ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel_throttle",&TwistCallback);
+ros::Publisher p("deBug", &test);
+
+const int
+Lmotor   = 3,
+Rmotor   = 11,
+Ldir     = 12,
+Rdir     = 13,
+SNS_A    = A0;
+
+void setup()
+{
+  //nh.getHardware()->setBaud(115200);
+  pinMode(Lmotor, OUTPUT);
+  pinMode(Rmotor, OUTPUT);
+  pinMode(Ldir, OUTPUT);
+  pinMode(Rdir, OUTPUT);
+  nh.initNode();
+  nh.subscribe(sub);
+  nh.advertise(p);
+}
+
         nav_twist.linear.y = 0;
         nav_twist.linear.z = 0; 
     }
@@ -291,7 +335,6 @@ int main(int argc, char **argv)
         
         else if(mode_ == xbox_mode)
         {
-          //ROS_INFO("MATT SUCKS");
             motor_pub.publish(geometry_twist);
             stopped = false;
         }
