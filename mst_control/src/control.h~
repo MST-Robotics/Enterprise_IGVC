@@ -56,12 +56,14 @@ ros::Publisher                  motor_pub;
 ros::Publisher                  p_cmd_vel;
 ros::Publisher                  sound_pub;
 ros::Publisher                  estop_pub;
+ros::Publisher                  light_pub;
 
 
 
 /***********************************************************
 * Global variables
 ***********************************************************/
+
 
 /*-----------------------------------
 	Velocity and sensor data variables
@@ -111,7 +113,7 @@ Autonomous_Mode
 };
 Autonomous_Mode autonomous_mode;
 
-MST_Control::Control_ParamsConfig params;
+mst_control::Control_ParamsConfig params;
 
 geometry_msgs::Twist nav_twist;           //Autonomous Navigation
 

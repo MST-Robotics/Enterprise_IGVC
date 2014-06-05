@@ -24,6 +24,8 @@
 #include <mst_position/target_heading.h>
 #include "mst_midg/IMU.h"
 #include "sensor_msgs/Joy.h"
+#include "geometry_msgs/Vector3.h"
+#include <std_msgs/Byte.h>
 /***********************************************************
 * Other includes
 ***********************************************************/
@@ -56,12 +58,14 @@ ros::Publisher                  motor_pub;
 ros::Publisher                  p_cmd_vel;
 ros::Publisher                  sound_pub;
 ros::Publisher                  estop_pub;
+ros::Publisher                  light_pub;
 
 
 
 /***********************************************************
 * Global variables
 ***********************************************************/
+
 
 /*-----------------------------------
 	Velocity and sensor data variables
