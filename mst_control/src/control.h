@@ -25,7 +25,7 @@
 #include "mst_midg/IMU.h"
 #include "sensor_msgs/Joy.h"
 #include "geometry_msgs/Vector3.h"
-#include <std_msgs/Byte.h>
+#include <std_msgs/Int8.h>
 /***********************************************************
 * Other includes
 ***********************************************************/

@@ -22,7 +22,7 @@
     <env name="ROS_MASTER_URI" value="http://$(arg robot_addr):11311" />
     
     <!-- launch rviz if requested -->
-    <node name="rviz_desktop" pkg="rviz" type="rviz" args="-d $(find mst_control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
+    <node name="rviz_desktop" pkg="rviz" type="rviz" args="-d $(find mst_control)/vcg/Joemegatron.rviz" if="$(arg rviz)"/>
     
     <!-- launch joy package-->
     <node pkg="joy" type="joy_node" name="joy_node" respawn="true"  />
@@ -99,7 +99,7 @@
 
     </group>
     
-    <node pkg="topic_tools" type="throttle" name="throttle" args="messages /cmd_vel 10" />
+    <node pkg="topic_tools" type="throttle" name="throttle" args="messages /cmd_vel 30" />
     <node pkg="topic_tools" type="throttle" name="throttle2" args="messages /indicator_light 10" />
     
     <node pkg="rosserial_python" type="serial_node.py" name="serial_node" args="/dev/ttyACM0" >

@@ -217,7 +217,7 @@ int main(int argc, char **argv)
 
     std::string nav;
     
-    std_msgs::Byte lightPulse;
+    std_msgs::Int8 lightPulse;
     lightPulse.data = 0;
     
     bool stopped = true;
@@ -252,7 +252,7 @@ int main(int argc, char **argv)
     
     //Create publishers
     motor_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);
-    light_pub = n.advertise<std_msgs::Byte>("indicator_light", 1);
+    light_pub = n.advertise<std_msgs::Int8>("indicator_light", 1);
     //sound_pub = n.advertise<sound_play::SoundRequest>("robotsound" ,100);
 
     //set rate to 30 hz
@@ -275,6 +275,8 @@ int main(int argc, char **argv)
         }
         if(mode_ ==standby)
         {
+            lightPulse.data = 0;
+            light_pub.publish(lightPulse);
             if(!stopped)
             {
                 stop_robot();
@@ -286,12 +288,14 @@ int main(int argc, char **argv)
         
         else if(mode_ == xbox_mode)
         {
+            lightPulse.data = 0;
             light_pub.publish(lightPulse);
             motor_pub.publish(geometry_twist);
             stopped = false;
         }
         else if(mode_ == autonomous)
         {
+            lightPulse.data = 1;
             light_pub.publish(lightPulse);
             motor_pub.publish(nav_twist);
             stopped = false;
