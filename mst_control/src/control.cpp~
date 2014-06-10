@@ -102,9 +102,10 @@ void xbox_callback(const sensor_msgs::Joy::ConstPtr& joy)
         }
             
             //Choose method of controlling the robot
-                geometry_twist.angular.z = (joy_rightstick_y)  * 12;//params.base_rot_speed;
-                geometry_twist.linear.x  = (joy_leftstick_x)   * 12;//params.base_linear_speed;
-         
+                geometry_twist.angular.z = (joy_rightstick_x)  * 12;//params.base_rot_speed;
+                
+                geometry_twist.linear.x  = (joy_leftstick_y)   * 12;//params.base_linear_speed;
+
             
         
         
@@ -217,7 +218,7 @@ int main(int argc, char **argv)
 
     std::string nav;
     
-    std_msgs::Byte lightPulse;
+    std_msgs::Int8 lightPulse;
     lightPulse.data = 0;
     
     bool stopped = true;
@@ -252,7 +253,7 @@ int main(int argc, char **argv)
     
     //Create publishers
     motor_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);
-    light_pub = n.advertise<std_msgs::Byte>("indicator_light", 1);
+    light_pub = n.advertise<std_msgs::Int8>("indicator_light", 1);
     //sound_pub = n.advertise<sound_play::SoundRequest>("robotsound" ,100);
 
     //set rate to 30 hz
@@ -275,37 +276,35 @@ int main(int argc, char **argv)
         }
         if(mode_ ==standby)
         {
-            if(!stopped)
-            {
-                stop_robot();
-                stopped = true;
-            }
+            lightPulse.data = 0;
+            light_pub.publish(lightPulse);
+            stop_robot();
+            stopped = true;
         }
         
         /*This is where you tell what your controller to publish*/
         
         else if(mode_ == xbox_mode)
         {
+            lightPulse.data = 0;
             light_pub.publish(lightPulse);
             motor_pub.publish(geometry_twist);
             stopped = false;
         }
         else if(mode_ == autonomous)
         {
+            lightPulse.data = 1;
             light_pub.publish(lightPulse);
             motor_pub.publish(nav_twist);
             stopped = false;
         }
         else
-            {
-                if(!stopped)
-                {
-                    stop_robot();
-                    stopped = true;
-                }
-            }
+        {
+            stop_robot();
+            stopped = true;
+        }
         
-      }
+    }
         
         //loop_rate.sleep();
     

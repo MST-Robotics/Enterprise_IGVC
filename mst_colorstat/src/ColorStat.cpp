@@ -183,7 +183,7 @@ int main(int argc, char **argv)
     dynamic_reconfigure::Server<mst_colorstat::ColorStat_ParamsConfig> srv;
     dynamic_reconfigure::Server<mst_colorstat::ColorStat_ParamsConfig>::CallbackType f;
     f = boost::bind(&setparamsCallback, _1, _2);
-	srv.setCallback(f);
+	  srv.setCallback(f);
     
     //get topic name
     topic = n.resolveName("camera/image_raw");

@@ -21,6 +21,7 @@
 #include "sensor_msgs/NavSatFix.h"
 #include "mst_position/target_heading.h"
 #include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 
 /***********************************************************
 * Other includes
@@ -81,6 +82,10 @@ double chosen_dist = -1;
 double chosen_brng = 0;
 int chosen_index = 99;
 
+int numPts = 0;
+int avgY = 0;
+int avgX = 0;    
+
 mst_position::target_heading    target_heading;
 
 mst_position::Position_ParamsConfig    params;
@@ -124,32 +129,57 @@ using namespace std;
 * @post image added to the map
 * @param takes in a ros message of a raw or cv image 
 ***********************************************************/
-void midgCallback(const  mst_midg::IMU::ConstPtr& imu)
+void midgCallback(const sensor_msgs::Imu::ConstPtr& imu)
 {
-	ROS_INFO("Position: IMU message receved");
-	
+	//ROS_INFO("Position: IMU message receved");
+	/*
 	//if using midg
 	if(!params.use_gpsd && !params.use_dummy)
 	{
-
 		if(imu->position_valid)
 		{
 		 	gps_fix = true;
-            current_time = ros::Time(imu->gps_time);
+      current_time = ros::Time(imu->gps_time);
 		 	//current_lat = imu->latitude; // 180 * pi;
 		 	//current_lon = imu->longitude; // 180 * pi;
 		}
-        else
-        {
-            gps_fix =false;
-        }
-		
-        if(imu->heading)
-            current_head = imu->heading + params.heading_offset;
-		
-	}
+    else
+    {
+      gps_fix =false;
+    }
+		if(imu->heading)
+      current_head = imu->heading + params.heading_offset;
+	}*/
 	
-
+	//Phone gps stuff
+	if(numPts == 3)
+	{
+	  //Compute average
+	  avgX /= 3;
+	  avgY /= 3;
+	  current_head = atan2(imu->orientation.y, imu->orientation.x);
+	  
+	  //We don't understand either
+	  if(current_head < 0)
+	  {
+	    current_head *= (180.0/85.0);
+	  }
+	  else if(current_head > 0)
+	  {
+	    current_head *= (180.0 / 97.0);
+	  }
+	  cout << current_head * 180 / (M_PI) << endl;
+	  numPts = 0;
+	  avgX = 0;
+	  avgY = 0;
+	}
+	else
+	{
+	  //Sum all data points
+	  avgX += imu->orientation.x;
+	  avgY += imu->orientation.y;
+	  numPts++;
+	}
 }
 
 /***********************************************************
@@ -385,7 +415,7 @@ double find_heading(double lat1, double lon1 , double lat2 ,double lon2)
     // magic forumla #2 we have no idea how it works, if it works or why it works
 
 	//find the bearing 
-    double x = sin(delta_lon) * cos(lat2);
+  double x = sin(delta_lon) * cos(lat2);
 
 	double y = cos(lat1) * sin(lat2) -
 				sin(lat1) * cos(lat1) * cos(delta_lon);
@@ -520,7 +550,7 @@ mst_position::target_heading compute_msg(int target)
 	double lon = way_lon[target] / 180 * pi; 
  	
 
-	heading.target_heading = current_head + pi/2 - find_heading(current_lat,current_lon,lat,lon);
+	heading.target_heading = current_head - find_heading(current_lat,current_lon,lat,lon);
 	heading.distance = find_dist(current_lat,current_lon,lat,lon);
 	heading.waypoint = target;
 	heading.done = false;
@@ -623,9 +653,9 @@ int main(int argc, char **argv)
 	srv.setCallback(f);
 
 	//create subsctiptions
-    midg_sub = n.subscribe( n.resolveName("midg") , 20, midgCallback );
+    midg_sub = n.subscribe( n.resolveName("/android/imu") , 20, midgCallback );
     
-    garmin_sub = n.subscribe( "fix" , 20, gpsCallback );
+    garmin_sub = n.subscribe( "/android/fix" , 20, gpsCallback );
 
     //create publishers
     target_pub = n.advertise<mst_position::target_heading>( "target" , 5 );

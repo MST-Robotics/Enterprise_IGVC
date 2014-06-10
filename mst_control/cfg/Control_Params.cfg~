@@ -1,13 +1,13 @@
 #! /usr/bin/env python
 # Forearm camera configuration
 
-PACKAGE='MST_Control'
+PACKAGE='mst_control'
 import roslib; roslib.load_manifest(PACKAGE)
 
 from math import pi
 
 from driver_base.msg import SensorLevels
-from dynamic_reconfigure.parameter_generator import *
+from dynamic_reconfigure.parameter_generator_catkin import *
 
 gen = ParameterGenerator()
 #       Name                    Type      Reconfiguration level             Description                                        Default    Min   Max
@@ -18,7 +18,7 @@ gen.add("turbo_y",              double_t, SensorLevels.RECONFIGURE_STOP,    "mul
 gen.add("d_pad_percent",        double_t, SensorLevels.RECONFIGURE_STOP,    "the percent that the dpad is scaled down",        50,        0,    100)
 gen.add("plus_mesage",          str_t, SensorLevels.RECONFIGURE_STOP,       "phrase to say when plus button is pressed",       "Pardon me. coming through.")
 gen.add("minus_sound",          str_t, SensorLevels.RECONFIGURE_STOP,       "sound to play when minus button is pressed",      "/home/robot/Documents/Joemegatron_IGVC_2011/sounds/Ahooga_Car_Horn.wav")
-gen.add("autonomous_waypoints", str_t, SensorLevels.RECONFIGURE_STOP,       ".yaml file with autonomous waypoints",            "/home/robot/Documents/Joemegatron_IGVC_2011/yaml/Autonomous_Waypoints.yaml")
+gen.add("autonomous_waypoints", str_t, SensorLevels.RECONFIGURE_STOP,       ".yaml file with autonomous waypoints",            "/home/enterprise/enterprise_ws/src/yaml/Practice_Waypoints.yaml")
 gen.add("navigation_waypoints", str_t, SensorLevels.RECONFIGURE_STOP,       ".yaml file with autonomous waypoints",            "/home/robot/Documents/Joemegatron_IGVC_2011/yaml/Navigation_Waypoints.yaml")
 gen.add("waypoint_sound",          str_t, SensorLevels.RECONFIGURE_STOP,       "sound to play when minus button is pressed",      "/home/robot/Documents/Joemegatron_IGVC_2011/sounds/Ahooga_Car_Horn.wav")
 gen.add("done_sound",          str_t, SensorLevels.RECONFIGURE_STOP,       "sound to play when minus button is pressed",      "/home/robot/Documents/Joemegatron_IGVC_2011/sounds/Ahooga_Car_Horn.wav")

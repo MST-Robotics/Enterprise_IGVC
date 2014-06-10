@@ -103,10 +103,8 @@ void xbox_callback(const sensor_msgs::Joy::ConstPtr& joy)
             
             //Choose method of controlling the robot
                 geometry_twist.angular.z = (joy_rightstick_y)  * 12;//params.base_rot_speed;
+                
                 geometry_twist.linear.x  = (joy_leftstick_x)   * 12;//params.base_linear_speed;
-         
-            
-        
         
     }
     
@@ -277,11 +275,8 @@ int main(int argc, char **argv)
         {
             lightPulse.data = 0;
             light_pub.publish(lightPulse);
-            if(!stopped)
-            {
-                stop_robot();
-                stopped = true;
-            }
+            stop_robot();
+            stopped = true;
         }
         
         /*This is where you tell what your controller to publish*/
@@ -301,15 +296,12 @@ int main(int argc, char **argv)
             stopped = false;
         }
         else
-            {
-                if(!stopped)
-                {
-                    stop_robot();
-                    stopped = true;
-                }
-            }
+        {
+            stop_robot();
+            stopped = true;
+        }
         
-      }
+    }
         
         //loop_rate.sleep();
     
