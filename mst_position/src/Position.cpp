@@ -1,6 +1,7 @@
 /*******************************************************************************
 * @file Position.cpp
 * @author James Anderson <jra798>
+* @maintainer Matt Anderson <mia2n4>
 * @version 1.0
 * @brief publishes transform tree using gps and headings taken in from garmin
 * and Midg and provides a service to transform gps coardinates into the world
@@ -129,7 +130,7 @@ using namespace std;
 * @post image added to the map
 * @param takes in a ros message of a raw or cv image 
 ***********************************************************/
-void midgCallback(const sensor_msgs::Imu::ConstPtr& imu)
+void midgCallback(const geometry_msgs::Quaternion::ConstPtr& imu)
 {
 	//ROS_INFO("Position: IMU message receved");
 	/*
@@ -151,35 +152,10 @@ void midgCallback(const sensor_msgs::Imu::ConstPtr& imu)
       current_head = imu->heading + params.heading_offset;
 	}*/
 	
-	//Phone gps stuff
-	if(numPts == 3)
-	{
-	  //Compute average
-	  avgX /= 3;
-	  avgY /= 3;
-	  current_head = atan2(imu->orientation.y, imu->orientation.x);
-	  
-	  //We don't understand either
-	  if(current_head < 0)
-	  {
-	    current_head *= (180.0/85.0);
-	  }
-	  else if(current_head > 0)
-	  {
-	    current_head *= (180.0 / 97.0);
-	  }
-	  cout << current_head * 180 / (M_PI) << endl;
-	  numPts = 0;
-	  avgX = 0;
-	  avgY = 0;
-	}
-	else
-	{
-	  //Sum all data points
-	  avgX += imu->orientation.x;
-	  avgY += imu->orientation.y;
-	  numPts++;
-	}
+    //Compute average
+    current_head = atan2(imu->y, imu->x);
+
+    cout << current_head * 180 / (M_PI) << endl;
 }
 
 /***********************************************************
@@ -653,7 +629,7 @@ int main(int argc, char **argv)
 	srv.setCallback(f);
 
 	//create subsctiptions
-    midg_sub = n.subscribe( n.resolveName("/android/imu") , 20, midgCallback );
+    midg_sub = n.subscribe( n.resolveName("/imu") , 20, midgCallback );
     
     garmin_sub = n.subscribe( "/android/fix" , 20, gpsCallback );
 
