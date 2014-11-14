@@ -94,13 +94,23 @@ void setup()
 }
 
 void loop()
-{
-  test.linear.x = linearVel;
-  
+{ 
   //Left and right velocities
-  leftVel = (linearVel * TURNS_PER_SEC) - (TURN_OFFSET * angularVel);
-  rightVel = (linearVel * TURNS_PER_SEC) + (TURN_OFFSET * angularVel);
+  /*leftVel = (linearVel * TURNS_PER_SEC) - (TURN_OFFSET * angularVel);
+  rightVel = (linearVel * TURNS_PER_SEC) + (TURN_OFFSET * angularVel);*/
+  rightVel = (2 * linearVel + angularVel * 2 * ROBOT_RAD) / ( 2 * WHEEL_RAD); 
+  leftVel = (2 * linearVel - angularVel * 2 * ROBOT_RAD) / ( 2 * WHEEL_RAD);
   
+  //Scale motor values
+  rightVel *= (MAX_PUB / 76);
+  leftVel  *= (MAX_PUB / 76);
+  
+  test.linear.x = rightVel;
+  test.linear.y = leftVel;
+  test.angular.x = linearVel;
+  test.angular.y = angularVel;
+  
+  /*
   if(lightMode == 1)
   {
     loopCount++;
@@ -111,7 +121,7 @@ void loop()
       digitalWrite(Light, LOW);
       loopCount = 0;
     }
-  }
+  }*/
     
   //take out any negative values
   if(abs(leftVel) > MAX_PUB)
@@ -123,6 +133,7 @@ void loop()
     leftDir = 0;
   else
     leftDir = 1;
+    
   if(rightVel < 0)
     rightDir = 1;
   else
