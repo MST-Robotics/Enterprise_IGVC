@@ -78,7 +78,7 @@ add_executable(Estop src/estop.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(Estop mst_estop_generate_message_cpp)
+add_dependencies(Estop mst_estop_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(Estop
