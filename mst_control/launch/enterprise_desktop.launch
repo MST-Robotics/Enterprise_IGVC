@@ -7,7 +7,7 @@
     
     
     <!-- Define arguments and defaults  -->
-    <arg name="robot_addr" default="192.168.1.133" />
+    <arg name="robot_addr" default="localhost" />
     <arg name="rviz" default="1" />
     <arg name="joy_node" default="1"/>
     <!--arg name="wiimote" default="0" /-->
