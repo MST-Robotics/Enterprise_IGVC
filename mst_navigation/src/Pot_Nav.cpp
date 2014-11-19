@@ -32,7 +32,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <dynamic_reconfigure/server.h>
 #include <mst_navigation/Pot_Nav_ParamsConfig.h>
-#include <cv.h>
+#include <opencv/cv.h>
 
 /***********************************************************
 * Namespace Changes

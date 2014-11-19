@@ -91,6 +91,7 @@ add_dependencies(ColorStat mst_colorstat_generate_messages_cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(ColorStat
   ${catkin_LIBRARIES} ColorStat_Stat ColorStat_error
+  ${OpenCV_LIBS}
 )
 
 #############
