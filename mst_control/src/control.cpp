@@ -170,22 +170,6 @@ void navigation_callback(const geometry_msgs::Twist twist)
     }
 }
 
-void estop_callback(const mst_estop::Estop_State::ConstPtr& estop)
-{
-
-        if(estop->state == 1 && !estop_togg)
-        {
-            //pauses
-            say("Joe-Mega-Tron E-Stopped");
-            system("rosrun dynamic_reconfigure dynparam set /Position pause true");
-            estop_togg = true;
-        }
-        else if(!estop->state)
-        {
-            estop_togg = false;
-        }
-}
-
 /***********************************************************
 * @fn setparamsCallback(const sensor_msgs::ImageConstPtr& msg)
 * @brief callback for the reconfigure gui
@@ -246,7 +230,6 @@ int main(int argc, char **argv)
     nav_sub = n.subscribe( nav ,100, navigation_callback);
     //pos_sub = n.subscribe( "/target" ,100, pos_callback);
     xbox_state_sub = n.subscribe<sensor_msgs::Joy>("joy", 1, xbox_callback);
-    //estop_sub = n.subscribe("/EStop" ,100 , estop_callback);
     
     //Create publishers
     motor_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);

@@ -16,7 +16,6 @@
     <arg name="display" default="0" />
     <arg name="usb" default="1"/>
     <arg name="edges" default="0"/>
-    <arg name="midge" default="1"/>
     
     <!-- conect to the specified master  -->
     <env name="ROS_MASTER_URI" value="http://$(arg robot_addr):11311" />
@@ -68,9 +67,7 @@
     
     <!--node pkg="mst_color" type="mst_color" name="mst_color" args= "image:=camera/image_color" /-->
       
-   
-    <!--node pkg="mst_midg" type="mst_midg" name="mst_midg" if="$(arg midge)"/-->
-    
+       
     <node pkg="mst_position" type="mst_position" name="mst_position">
         
       <rosparam file="$(find mst_control)/yaml/Practice_Waypoints.yaml" command="load" />

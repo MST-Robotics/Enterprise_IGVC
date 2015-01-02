@@ -20,9 +20,7 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 //#include <sound_play/SoundRequest.h>
-#include <mst_estop/Estop_State.h>
 #include <mst_position/target_heading.h>
-#include "mst_midg/IMU.h"
 #include "sensor_msgs/Joy.h"
 #include "geometry_msgs/Vector3.h"
 #include <std_msgs/Int8.h>
@@ -44,7 +42,6 @@
 ros::Subscriber                 xbox_state_sub;
 ros::Subscriber                 s_msg;
 ros::Subscriber                 nav_sub;
-ros::Subscriber                 estop_sub;
 ros::Subscriber                 pos_sub;
 
 
@@ -57,7 +54,6 @@ ros::Subscriber                 pos_sub;
 ros::Publisher                  motor_pub;
 ros::Publisher                  p_cmd_vel;
 ros::Publisher                  sound_pub;
-ros::Publisher                  estop_pub;
 ros::Publisher                  light_pub;
 
 
@@ -131,7 +127,6 @@ geometry_msgs::Twist geometry_twist;
 bool xtogg[30];
 bool robot_init;
 bool done_togg = 0;
-bool estop_togg = 0;
 int last_msg_waypoint = 0;
 
 /***********************************************************

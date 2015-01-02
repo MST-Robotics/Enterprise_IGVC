@@ -48,7 +48,6 @@
   <build_depend>tf</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>mst_midg</build_depend>
   
   <run_depend>driver_base</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
@@ -56,9 +55,8 @@
   <run_depend>nav_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>tf</run_depend>
-	<run_depend>message_runtime</run_depend>
-	<run_depend>std_msgs</run_depend>
-	<run_depend>mst_midg</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_msgs</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

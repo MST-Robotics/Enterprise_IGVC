@@ -13,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   message_generation
   std_msgs
-  mst_midg
 )
 
 ## System dependencies are found with CMake's conventions

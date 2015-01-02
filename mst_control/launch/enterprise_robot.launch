@@ -136,8 +136,6 @@ Date: 4/23/12
     <!-- launch the midg motors and estop drivers if on robot -->
     <group if="$(arg robot)">
 
-        <include file="$(find mst_midg)/launch/midg.launch" />
-
         <!-- launch the ekf to track robot movement -->
         <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
             <param name="output_frame" value="odom_combined"/>
@@ -152,8 +150,6 @@ Date: 4/23/12
         
         <node pkg="mst_motors" type="Motors" name="Motors" />
         
-        <!-- <node pkg="mst_estop" type="Estop" name="Estop" /> -->
-
     </group>
     
 

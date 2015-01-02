@@ -4,7 +4,7 @@
 * @maintainer Matt Anderson <mia2n4>
 * @version 1.0
 * @brief publishes transform tree using gps and headings taken in from garmin
-* and Midg and provides a service to transform gps coardinates into the world
+* and provides a service to transform gps coardinates into the world
 * frame 
 ******************************************************************************/
 
@@ -18,7 +18,6 @@
 * Message includes
 ***********************************************************/
 #include "geometry_msgs/Twist.h"
-#include "mst_midg/IMU.h"
 #include "sensor_msgs/NavSatFix.h"
 #include "mst_position/target_heading.h"
 #include <nav_msgs/Odometry.h>
@@ -40,7 +39,7 @@
 ***********************************************************/
 
 
-ros::Subscriber                 midg_sub;
+ros::Subscriber                 imu_sub;
 ros::Subscriber                 garmin_sub;
 
 ros::Publisher                  target_pub;
@@ -130,28 +129,8 @@ using namespace std;
 * @post image added to the map
 * @param takes in a ros message of a raw or cv image 
 ***********************************************************/
-void midgCallback(const geometry_msgs::Quaternion::ConstPtr& imu)
+void imuCallback(const geometry_msgs::Quaternion::ConstPtr& imu)
 {
-	//ROS_INFO("Position: IMU message receved");
-	/*
-	//if using midg
-	if(!params.use_gpsd && !params.use_dummy)
-	{
-		if(imu->position_valid)
-		{
-		 	gps_fix = true;
-      current_time = ros::Time(imu->gps_time);
-		 	//current_lat = imu->latitude; // 180 * pi;
-		 	//current_lon = imu->longitude; // 180 * pi;
-		}
-    else
-    {
-      gps_fix =false;
-    }
-		if(imu->heading)
-      current_head = imu->heading + params.heading_offset;
-	}*/
-	
     //Compute average
     current_head = atan2(imu->y, imu->x);
 
@@ -541,7 +520,7 @@ nav_msgs::Odometry odom_msg()
 {
     nav_msgs::Odometry odom;
     odom.header.stamp = current_time;
-    odom.header.frame_id = "midg_link";
+    odom.header.frame_id = "imu_link";
     
     //Calculate local coord from lat/lon
     double dist = find_dist(inital_lat, inital_lon, current_lat, current_lon);
@@ -629,7 +608,7 @@ int main(int argc, char **argv)
 	srv.setCallback(f);
 
 	//create subsctiptions
-    midg_sub = n.subscribe( n.resolveName("/imu") , 20, midgCallback );
+    imu_sub = n.subscribe( n.resolveName("/imu") , 20, imuCallback );
     
     garmin_sub = n.subscribe( "/android/fix" , 20, gpsCallback );
 
