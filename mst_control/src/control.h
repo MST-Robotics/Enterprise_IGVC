@@ -24,18 +24,18 @@
 #include "sensor_msgs/Joy.h"
 #include "geometry_msgs/Vector3.h"
 #include <std_msgs/Int8.h>
+
 /***********************************************************
 * Other includes
 ***********************************************************/
 #include <iostream>
 #include <fstream>
 #include <cv_bridge/cv_bridge.h>
-//#include <cv.h>
-//#include <highgui.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <dynamic_reconfigure/server.h>
 #include <mst_control/Control_ParamsConfig.h>
+
 /***********************************************************
 * Subscribers
 ***********************************************************/
@@ -50,7 +50,7 @@ ros::Subscriber                 pos_sub;
 ***********************************************************/
 
 
-//ros::Publisher                  wiimote_rum_pub; Switch out for xbox rumble
+//ros::Publisher                wiimote_rum_pub; Switch out for xbox rumble
 ros::Publisher                  motor_pub;
 ros::Publisher                  p_cmd_vel;
 ros::Publisher                  sound_pub;
@@ -61,6 +61,9 @@ ros::Publisher                  light_pub;
 /***********************************************************
 * Global variables
 ***********************************************************/
+
+const float ROT_SPEED    = 12.0;
+const float LINEAR_SPEED = 12.0;
 
 
 /*-----------------------------------
@@ -93,18 +96,16 @@ ros::Publisher                  light_pub;
     #define  joy_r_stick    10static bool check_togg(bool, int);static bool check_togg(bool, int);
     
 //Enumorator for each mode 
-enum
-Mode
+enum Mode
 {
     standby,
     xbox_mode,
     autonomous
-} 
-mode_;
+};
+Mode mode_;
 
 //Enumerator for autonomous mode
-enum
-Autonomous_Mode
+enum Autonomous_Mode
 {
     navigation,
     autonomous_waypoints
@@ -122,7 +123,6 @@ geometry_msgs::Twist nav_twist;           //Autonomous Navigation
 *
 *See xbox_callback
 ******************************************************************/
-
 geometry_msgs::Twist geometry_twist;      
 bool xtogg[30];
 bool robot_init;

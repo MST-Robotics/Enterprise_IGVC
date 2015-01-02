@@ -7,145 +7,112 @@
 ******************************************************************************/
 #include "control.h"
 
-
-/***********************************************************
+/*******************************************************************************
 * Message Callbacks
-***********************************************************/
+*******************************************************************************/
 
-
-
-/***********************************************************
-* @fn wiimote_callback(const wiimote::State::ConstPtr& state
-* @brief handels input from the wiimote
-* @pre takes in a wiimote state message
-* @post computes wii_twist variable and changes mode
-***********************************************************/
-/*void pos_callback( const MST_Position::Target_Heading::ConstPtr& msg)
+/*******************************************************************************
+* @fn pos_callback(const mst_position::Target_Heading::ConstPtr& msg)
+* @brief callback function for the target heading
+* @param mst_position::Target_Heading::ConstPtr& msg A Target_Heading message
+*        which checks if the robot has reached the last waypoint
+* @pre Waypoints exist in parameter server
+* @post The robot will travel to each waypoint before finishing
+*******************************************************************************/
+void pos_callback(const mst_position::target_heading::ConstPtr& msg)
 {
         if(msg->done && !done_togg)
         {
-            play(params.done_sound);
-            ros::Duration(6).sleep();
-            //change_mode( standby );
+            change_mode(standby);
             done_togg = true;
         }
         else if (!msg->done)
         {
             done_togg = false;
         }
-        
+
         if(msg->waypoint != last_msg_waypoint)
         {
             say("moving to next waypoint");
-            play(params.waypoint_sound);
             last_msg_waypoint = msg->waypoint;
         }
-        //waypoint 
+}
 
-}*/
-
-/***********************************************************
-* Xbox CRAP
-***********************************************************/
+/*******************************************************************************
+* @fn xbox_callback(const sensor_msgs::Joy::ConstPtr& joy)
+* @brief callback function for the xbox controller, maps the inputs from joy to
+* 		 global variables
+* @param joy the message from joy node
+* @pre A valid joy message has been recieved
+* @post The robot state will switch or the cmd_vel message will change
+*******************************************************************************/
 void xbox_callback(const sensor_msgs::Joy::ConstPtr& joy)
-{                                    //xbox controller axes
+{
+	//Xbox buttons are defined in the header
+
+	//xbox controller axes
     joy_rightstick_x = joy->axes[4];
     joy_rightstick_y = joy->axes[3];
     
-    joy_leftstick_x  =joy->axes[1];  //each set of two represents our x as linear and y as angular, to change  joystick goup to Navigation::run()
-    joy_leftstick_y  =joy->axes[0];
+    joy_leftstick_x  = joy->axes[1];
+    joy_leftstick_y  = joy->axes[0];
     
-    joy_r_trigger    =joy->axes[5];
-    joy_l_trigger    =joy->axes[2];
+    joy_r_trigger    = joy->axes[5];
+    joy_l_trigger    = joy->axes[2];
     
-
-     /*                                //xbox control buttons
-    joy_button_A =joy->buttons[0];
-    joy_button_B =joy->buttons[1];
-    joy_button_X =joy->buttons[2];
-    joy_button_Y =joy->buttons[3];
-    joy_r_button =joy->buttons[5];
-    joy_l_button =joy->buttons[4];
-    joy_start_b  =joy->buttons[7];
-    joy_back_b   =joy->buttons[6];
-    joy_dpad_up  =joy->buttons[13];
-    joy_dpad_dwn =joy->buttons[14];
-    joy_dpad_l   =joy->buttons[11];
-    joy_dpad_r   =joy->buttons[12];
-    joy_light    =joy->buttons[8];
-    joy_l_stick  =joy->buttons[9];
-    joy_r_stick  =joy->buttons[10];
-    */
-    
-    if(mode_ == xbox_mode)
+    switch(mode_)
     {
-    
-        //initalize twist 
-        geometry_twist.angular.x = 0;
-        geometry_twist.angular.y = 0;
-        geometry_twist.angular.z = 0;
-        geometry_twist.linear.x = 0;
-        geometry_twist.linear.y = 0;
-        geometry_twist.linear.z = 0;
-        
-        //Controller Behavior in controller mode
-        //Assign buttons to change mode
-        if(check_togg(joy->buttons[joy_button_Y], joy_button_Y))
-        {
-            change_mode(autonomous);
-        }
+    	case xbox_mode:
+    		//initalize twist
+			geometry_twist.angular.x = 0;
+			geometry_twist.angular.y = 0;
+			geometry_twist.angular.z = 0;
+			geometry_twist.linear.x = 0;
+			geometry_twist.linear.y = 0;
+			geometry_twist.linear.z = 0;
 
-        
-        if(check_togg(joy->buttons[joy_button_B], joy_button_B))
-        {
-            change_mode(standby);
-        }
-            
-            //Choose method of controlling the robot
-                geometry_twist.angular.z = (joy_rightstick_y)  * 12;//params.base_rot_speed;
-                
-                geometry_twist.linear.x  = (joy_leftstick_x)   * 12;//params.base_linear_speed;
-        
-    }
-    
-    //Controller Behavior in autonomous mode
-    //Assign buttons to change mode
-    if(mode_ == autonomous)
-    {
-        
-        if(check_togg(joy->buttons[joy_button_B], joy_button_B))                  
-        {
-            change_mode(standby);
-        }
-        
-        
-        if(check_togg(joy->buttons[joy_button_A], joy_button_B))
-        {
-            change_mode(xbox_mode);
-        }
-        
-       
-        
-    }
-    //Controller Behavior in standby mode
-    if(mode_ == standby)
-    {
-        
-        if(check_togg(joy->buttons[joy_button_Y], joy_button_Y))                  
-        {
-            change_mode(autonomous);
-        }
-        
-        
-        if(check_togg(joy->buttons[joy_button_A], joy_button_A))
-        {
-            change_mode(xbox_mode);
-        }
-        
-       
-        
-    }
+			//Controller Behavior in controller mode
+			//Check to see if the mode needs to be changed
+			if(check_togg(joy->buttons[joy_button_Y], joy_button_Y))
+			{
+				//Change to autonomous
+				change_mode(autonomous);
+			}
+			else if(check_togg(joy->buttons[joy_button_B], joy_button_B))
+			{
+				//Change to standby
+				change_mode(standby);
+			}
 
+			//Modify the twist message to send to the motors
+			geometry_twist.angular.z = (joy_rightstick_y)  * ROT_SPEED;
+			geometry_twist.linear.x  = (joy_leftstick_x)   * LINEAR_SPEED;
+			break;
+
+    	case autonomous:
+    		//Check to see if the mode should be changed
+    		if(check_togg(joy->buttons[joy_button_B], joy_button_B))
+			{
+				change_mode(standby);
+			}
+    		else if(check_togg(joy->buttons[joy_button_A], joy_button_B))
+			{
+				change_mode(xbox_mode);
+			}
+			break;
+
+    	case standby:
+    		//Check to see if the mode should be changed
+            if(check_togg(joy->buttons[joy_button_Y], joy_button_Y))
+            {
+                change_mode(autonomous);
+            }
+            else if(check_togg(joy->buttons[joy_button_A], joy_button_A))
+            {
+                change_mode(xbox_mode);
+            }
+            break;
+    }
 }
 
 /***********************************************************
@@ -158,7 +125,7 @@ void xbox_callback(const sensor_msgs::Joy::ConstPtr& joy)
 ***********************************************************/
 void navigation_callback(const geometry_msgs::Twist twist)
 {
-    if(mode_==autonomous)// || mode_==jaus)      
+    if(mode_== autonomous)
     {
         //initalize twist
         nav_twist.angular.x = 0;
@@ -178,47 +145,34 @@ void navigation_callback(const geometry_msgs::Twist twist)
 ***********************************************************/
 void setparamsCallback(mst_control::Control_ParamsConfig &config, uint32_t level)
 {
-  //ROS_INFO("Reconfigure request : %i %i %f %f %f %f %f ",
-           //config.robot_x, config.robot_y, config.edges_per, config.lines_per, config.flags_per, 
-           //config.obst_per, config.grass_per);
-  
-  
-  
-  // set params
+  // Get the parameters from the parameter server
   params = config;
-  
 }
-/***********************************************************
+
+/*******************************************************************************
 * @fn main(int argc, char **argv)state.buttons[state.MSG_BTN_HOME]
-* @brief starts the Controll node and publishes motor comands
-***********************************************************/
+* @brief starts the Control node and publishes motor commands
+*******************************************************************************/
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "Control");
     ros::NodeHandle n;
-
-    std::string nav;
     
+    //Light Information
     std_msgs::Int8 lightPulse;
     lightPulse.data = 0;
     
+    //Setup initial robot state variables
     bool stopped = true;
     robot_init = true;  
     mode_ = standby;
     autonomous_mode = navigation;
-    //system("rosrun dynamic_reconfigure dynparam set /Position go_to_waypoints false");
-    //setup dynamic reconfigure gui
-    //dynamic_reconfigure::Server<mst_control::Control_ParamsConfig> srv;
-    //dynamic_reconfigure::Server<mst_control::Control_ParamsConfig>::CallbackType f;
-    //f = boost::bind(&setparamsCallback, _1, _2);
-    //srv.setCallback(f);
     
-
-    
-    //get topic name
+    //Find the topic name
+    std::string nav;
     nav = n.resolveName("nav_twist");
 
-    //check to see if user has defined an image to subscribe to 
+    //Ensure that the twist topic from autonomous is named nav_twist
     if (nav == "nav_twist")   
     {
         ROS_WARN("Control: navigation twist has not beeen remaped! Typical command-line usage:\n"
@@ -226,72 +180,87 @@ int main(int argc, char **argv)
     }
     
     
-    // create subscriptions
+    //Create subscriptions
     nav_sub = n.subscribe( nav ,100, navigation_callback);
-    //pos_sub = n.subscribe( "/target" ,100, pos_callback);
+    pos_sub = n.subscribe( "/target" ,100, pos_callback);
     xbox_state_sub = n.subscribe<sensor_msgs::Joy>("joy", 1, xbox_callback);
     
     //Create publishers
     motor_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     light_pub = n.advertise<std_msgs::Int8>("indicator_light", 1);
-    //sound_pub = n.advertise<sound_play::SoundRequest>("robotsound" ,100);
 
-    //set rate to 30 hz
+    //Set ros loop rate to 30Hz
     ros::Rate loop_rate(30);
     
-    //run main loop
+    //Main loop
     while (ros::ok())
     {
-        //check calbacks
+        //Check for new messages
         ros::spinOnce();
-        
         
         if(robot_init)
         {
-            //ros::Duration(6).sleep();
-            
+        	//First time initialization
             say("Hello World. My name is S and T Enterprise. Please press the EX box button to connect");
-            //ros::Duration(12).sleep();
             robot_init = false;
         }
-        if(mode_ ==standby)
+        
+        switch(mode_)
         {
-            lightPulse.data = 0;
-            light_pub.publish(lightPulse);
-            stop_robot();
-            stopped = true;
+        	case standby:
+        		//Light should be solid
+        		lightPulse.data = 0;
+				light_pub.publish(lightPulse);
+
+				//Ensure the robot isn't moving
+				stop_robot();
+				stopped = true;
+
+				break;
+
+        	case xbox_mode:
+        		//Light should be solid
+        		lightPulse.data = 0;
+				light_pub.publish(lightPulse);
+
+				//Publish the message created from joy
+				motor_pub.publish(geometry_twist);
+				stopped = false;
+
+				break;
+
+        	case autonomous:
+        		//Light should blink
+        		lightPulse.data = 1;
+				light_pub.publish(lightPulse);
+
+				//Publish the twist message created from navigation
+				motor_pub.publish(nav_twist);
+				stopped = false;
+
+				break;
+
+        	default:
+        		stop_robot();
+        		stopped = true;
         }
         
-        /*This is where you tell what your controller to publish*/
-        
-        else if(mode_ == xbox_mode)
-        {
-            lightPulse.data = 0;
-            light_pub.publish(lightPulse);
-            motor_pub.publish(geometry_twist);
-            stopped = false;
-        }
-        else if(mode_ == autonomous)
-        {
-            lightPulse.data = 1;
-            light_pub.publish(lightPulse);
-            motor_pub.publish(nav_twist);
-            stopped = false;
-        }
-        else
-        {
-            stop_robot();
-            stopped = true;
-        }
-        
+        //Wait until the 30Hz interval has ended
+        loop_rate.sleep();
     }
-        
-        //loop_rate.sleep();
-    
     
     return 0;
 }
 
+/*******************************************************************************
+* @fn check_togg(bool button_state, int button_position)
+* @brief Toggles an xbox buttons value in xtogg array to button state
+* @pre An xbox controller should be enabled and a button should be pressed
+* @post The value of the button in xtogg array is toggled based on its previous
+*       value
+* @param bool button_state The previous state of the button
+* @param bool button_position The number assigned to the button by the joy node
+*******************************************************************************/
 bool check_togg(bool button_state, int button_position)
 {
     bool togg = false;
@@ -309,38 +278,38 @@ bool check_togg(bool button_state, int button_position)
     
     return togg;
 }
+
+/*******************************************************************************
+* @fn change_mode(Mode new_mode)
+* @brief Changes the global variable for robot mode
+* @post Robot mode is changed to new_mode
+* @param Mode new_mode the new mode to change the robot to
+*******************************************************************************/
 void change_mode(Mode new_mode)
 {
-    
-    //wiimote::LEDControl led;
-    //sound_play::SoundRequest sound;
-    
     mode_ = new_mode;
     
     if (mode_ == standby)
     {
         ROS_INFO("Control: Standby Mode");
-        //say("Enterprise standing by");  
     }
-    
-
-    if (mode_ == autonomous)
+    else if (mode_ == autonomous)
     {
         ROS_INFO("Control: Autonomous Mode");
-        
-        //say("Intializing autonomous navigation");
-        
     }
-    
-    if (mode_ == xbox_mode)
+    else if (mode_ == xbox_mode)
     {
         ROS_INFO("Control: Xbox Mode");
-        
-        
-       // say("Controller Mode Initialized");
-       // say("Enterprise at your command");
     }
 }
+
+/*******************************************************************************
+* @fn say(std::string say)
+* @brief This will have the robot use its speakers to say the string with TTS
+* @pre sound_play is running
+* @post The robot plays the text through the speakers
+* @param std::string say The string that should be read aloud using TTS
+*******************************************************************************/
 void say(std::string say)
 {
     /*sound_play::SoundRequest sound;
@@ -352,18 +321,12 @@ void say(std::string say)
     sound_pub.publish(sound);*/
 }
 
-
-void play(std::string play)
-{
-    /*sound_play::SoundRequest sound;
-    
-    sound.sound = sound.PLAY_FILE;
-    sound.command = sound.PLAY_ONCE;
-    sound.arg = play;
-    
-    sound_pub.publish(sound);*/
-}
-
+/*******************************************************************************
+* @fn stop_robot()
+* @brief stops the robot from moving by sending a twist message populated by 0s
+* @pre Robot should be initialized
+* @post The robot is no longer moving
+*******************************************************************************/
 void stop_robot()
 {
     geometry_msgs::Twist stop_twist;

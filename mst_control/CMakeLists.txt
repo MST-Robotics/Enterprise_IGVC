@@ -8,6 +8,8 @@ find_package(catkin REQUIRED
   dynamic_reconfigure
   roscpp
   message_generation
+  sensor_msgs
+  nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -71,7 +73,8 @@ generate_dynamic_reconfigure_options(
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
    DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
+   std_msgs
+   mst_position
  )
 
 ###################################
@@ -86,8 +89,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES mst_control
-  CATKIN_DEPENDS dynamic_reconfigure 
-  CATKIN_DEPENDS message_runtime
+  CATKIN_DEPENDS mst_position dynamic_reconfigure message_runtime
   DEPENDS system_lib
 )
 
