@@ -222,7 +222,6 @@ void setparamsCallback(mst_position::Position_ParamsConfig &config, uint32_t lev
 * @pre takes in a bool to skip the current target
 * @post publishes a message to target_heading
 ***********************************************************/
-/*
 void send_target(bool skip)
 {
 	vector<int>  potential_waypoints;
@@ -305,7 +304,7 @@ void send_target(bool skip)
 	}
 	
 }
-*/
+
 /***********************************************************
 * @fn reset_waypoints()
 * @brief resets waypoints list
