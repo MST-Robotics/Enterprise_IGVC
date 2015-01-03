@@ -610,10 +610,10 @@ int main(int argc, char **argv)
 	//create subsctiptions
     imu_sub = n.subscribe( n.resolveName("/imu") , 20, imuCallback );
     
-    garmin_sub = n.subscribe( "/android/fix" , 20, gpsCallback );
+    garmin_sub = n.subscribe( "/fix" , 20, gpsCallback );
 
     //create publishers
-    target_pub = n.advertise<mst_position::target_heading>( "target" , 5 );
+    target_pub = n.advertise<mst_position::target_heading>( "/target" , 5 );
         
     odom_pub = n.advertise<nav_msgs::Odometry>( "vo", 5 );
     
