@@ -2,7 +2,7 @@
 * @file Pot_Nav.cpp
 * @author James Anderson <jra798>
 * @version 1.0
-* @brief findes the forward and angular velocity to move the robot at 
+* @brief finds the forward and angular velocity to move the robot at
 * given a fuzzy model
 ******************************************************************************/
 
@@ -104,7 +104,7 @@ geometry_msgs::Twist find_twist();
 /*
 void edgesCallback( const sensor_msgs::ImageConstPtr& msg)
 {
-	//ROS_INFO("Pot_Nav: Edges image receieved");
+	//ROS_INFO("Pot_Nav: Edges image received");
 	
 	cv_bridge::CvImagePtr cv_ptr_src;
 	
@@ -122,7 +122,7 @@ void edgesCallback( const sensor_msgs::ImageConstPtr& msg)
     
     if(first_callback)
     {
-		//initalize map
+		//initialize map
 		map.image = cv::Mat::zeros(cv_ptr_src->image.size(),CV_32FC1);
 		map.encoding = "32FC1";
 		
@@ -131,7 +131,7 @@ void edgesCallback( const sensor_msgs::ImageConstPtr& msg)
 
     
 
-    //adds them together using weghted persentage
+    //adds them together using weighted percentage
 
 	edges_q.push(cv_ptr_src->image * params.edges_per/100); 
 	edges_time_q.push(cv_ptr_src->header.stamp) ;
@@ -143,45 +143,42 @@ void edgesCallback( const sensor_msgs::ImageConstPtr& msg)
 */
 
 /***********************************************************
-* @fn edgesCallback(const sensor_msgs::ImageConstPtr& msg)
-* @brief adds the edges image to map using a weight 
+* @fn void statCallback( const sensor_msgs::ImageConstPtr& msg)
+* @brief adds the color stat image to the map image
 * @pre takes in a ros message of a raw or cv image
 * @post image added to the map
 * @param takes in a ros message of a raw or cv image 
 ***********************************************************/
 void statCallback( const sensor_msgs::ImageConstPtr& msg)
 {
-	//ROS_INFO("Pot_Nav: Statistics image receieved");
 	cv_bridge::CvImagePtr cv_ptr_src;
 	std::vector<cv::Mat> Chanels;
 	
 	//takes in the image
-  try
-  {
-    cv_ptr_src = cv_bridge::toCvCopy(msg, "rgb8");
-  }
-  catch (cv_bridge::Exception& e)
-  {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
-  
-  if(first_callback)
-  {
-	  //initalize map
+	try
+	{
+		cv_ptr_src = cv_bridge::toCvCopy(msg, "rgb8");
+	}
+	catch (cv_bridge::Exception& e)
+	{
+		ROS_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+
+	if(first_callback)
+	{
+		//initalize map
 		map.image = cv::Mat::zeros(cv_ptr_src->image.size(),CV_32FC1);
 		map.encoding = "32FC1";
 		
 		first_callback = 0;
 	}
 
-  cv::split(cv_ptr_src->image , Chanels);
+	cv::split(cv_ptr_src->image , Chanels);
     
-  Chanels[1].convertTo(Chanels[1],CV_32FC1);
+	Chanels[1].convertTo(Chanels[1],CV_32FC1);
     
-    
-    
-  /*
+	/*
 	stat_q.push( Chanels[1] * params.stat_per/100) ;
 	stat_time_q.push( cv_ptr_src->header.stamp) ;
 	*/
@@ -190,21 +187,14 @@ void statCallback( const sensor_msgs::ImageConstPtr& msg)
 	
 	map.header = cv_ptr_src->header;
 
-    
-    //adds them together using weghted persentage
-    
-    
-   
-  map_changed = 1;
+    //adds them together using weighted percentage
 
-    
-    
-
+	map_changed = 1;
 }
 
 /***********************************************************
 * @fn targetCallback( const MST_Position::Target_Heading::ConstPtr& msg)
-* @brief copys taget message to global variable 
+* @brief copies target message to global variable
 ***********************************************************/
 void targetCallback( const mst_position::target_heading::ConstPtr& msg)
 {
@@ -224,11 +214,8 @@ void targetCallback( const mst_position::target_heading::ConstPtr& msg)
 ***********************************************************/
 void setparamsCallback(mst_navigation::Pot_Nav_ParamsConfig &config, uint32_t level)
 {
-
-  
   // set params
   params = config;
-  
 }
 
 /***********************************************************
@@ -238,74 +225,74 @@ void setparamsCallback(mst_navigation::Pot_Nav_ParamsConfig &config, uint32_t le
 /***********************************************************
 * @fn find_twist()
 * @brief computes the twists using the map
-* @pre needs a globaly defined map it uses to compute twist
+* @pre needs a globally defined map it uses to compute twist
 * @post computes the twist
-* @return reterns the gemoetry messages standard twist and 
-* draws debug info on map_dis
+* @return returns the geometry messages standard twist and
+* 		  draws debug info on map_dis
 ***********************************************************/
 geometry_msgs::Twist find_twist()
 {
 	cv::Point2i robot_center;
-  geometry_msgs::Twist twist;
-  cv::Point2i box_1;
-  cv::Point2i box_2;
-    
-    
-  //find botom center of the image
-  robot_center.x = map.image.cols/2 ;
-  robot_center.y = map.image.rows - 1 ;
-    
-  box_1.x = robot_center.x - params.robot_x;
-  box_1.y = robot_center.y - params.robot_y;
-  
-  box_2.x = robot_center.x + params.robot_x;
-  box_2.y = robot_center.y + params.robot_y;
-    
-  map.image.copyTo(map_dis.image);
-  map_dis.header = map.header;
-  map_dis.encoding = map.encoding;
-    
-  //draw box in place of robot
+	geometry_msgs::Twist twist;
+	cv::Point2i box_1;
+	cv::Point2i box_2;
+
+
+	//find bottom center of the image
+	robot_center.x = map.image.cols / 2;
+	robot_center.y = map.image.rows - 1;
+
+	box_1.x = robot_center.x - params.robot_x;
+	box_1.y = robot_center.y - params.robot_y;
+
+	box_2.x = robot_center.x + params.robot_x;
+	box_2.y = robot_center.y + params.robot_y;
+
+	map.image.copyTo(map_dis.image);
+	map_dis.header = map.header;
+	map_dis.encoding = map.encoding;
+
+	//draw box in place of robot
 	cv::rectangle(map_dis.image, box_1, box_2 , 255 ,-2*params.robot_filled+1);
-	
+
 	//remove robot from the map
 	cv::rectangle(map.image, box_1, box_2 , 0,-1);
-	
+
 	//draw the search radius
 	cv::circle(map_dis.image, robot_center, params.search_radius, 255);
-	
-  //initalize twist and apply forward foring funciton
+
+	//initialize twist and apply forward foring funciton
 	twist.linear.y = 0;
 	twist.linear.x = params.carrot_on_a_stick;
-  twist.linear.z = 0;
-    
-  twist.angular.x = 0;
-  twist.angular.y = 0;
-  twist.angular.z = 0;
-    
-  //add  in target
-  //ignoring y for now
-  /*twist.linear.x += (params.target_weight_y/100.0) * sin(target.target_heading)/ (target.distance * params.target_dist_scale/1000) ;*/
-    
-  int sign = 1;
-  if (cos(target.target_heading) < 0)
-  {
-      sign = -1;
-  } 
-    
-  twist.angular.z += (params.target_weight_z/100.0) * ((twist.linear.x * params.target_y_scale) +1) * pow(fabs(cos(target.target_heading)), params.target_x_exp) * sign / ((target.distance * params.target_dist_scale/1000) + 1) ;
-    
+	twist.linear.z = 0;
+
+	twist.angular.x = 0;
+	twist.angular.y = 0;
+	twist.angular.z = 0;
+
+	//add  in target
+	//ignoring y for now
+	/*twist.linear.x += (params.target_weight_y/100.0) * sin(target.target_heading)/ (target.distance * params.target_dist_scale/1000) ;*/
+
+	int sign = 1;
+	if (cos(target.target_heading) < 0)
+	{
+		sign = -1;
+	}
+
+	twist.angular.z += (params.target_weight_z/100.0) * ((twist.linear.x * params.target_y_scale) +1) * pow(fabs(cos(target.target_heading)), params.target_x_exp) * sign / ((target.distance * params.target_dist_scale/1000) + 1) ;
+
 	ROS_INFO("y: %f x: %f twist: %f ", sin(target.target_heading) , cos(target.target_heading), twist.angular.z );
-    
-  //compute twist
-  for(int deg = 0 ;  deg <= params.search_res ; deg++ )
-  {
+
+	//compute twist
+	for(int deg = 0 ;  deg <= params.search_res ; deg++ )
+	{
 		float degree = deg;
 		float res = params.search_res;
 		float theta = pi*(degree/res);
 		cv::Point2f search_edge;
-		
-		
+
+
 		//compute the edge point
 		search_edge.x = (robot_center.x + ((cos(theta) * params.search_radius)));
 		search_edge.y = (robot_center.y - ((sin(theta) * params.search_radius)));
@@ -323,62 +310,51 @@ geometry_msgs::Twist find_twist()
 		
 		for(int pos = 0 ; pos < ray.count ; pos++ , ++ray)
 		{
-		    
+
 			if(ray.pos().x > robot_center.x + params.robot_x || 
 			   ray.pos().x < robot_center.x - params.robot_x ||
 			   ray.pos().y < robot_center.y - params.robot_y )
 			{
-			
-			
 				/*
-				@todo This is most definatly the wrong way to access pixls on the iterator sice it should return a pointer
+				@todo This is most definitely the wrong way to access pixels on
+				the iterator since it should return a pointer
 				but I give up for now
 				*/
-				
 				
 				if(params.display_rays)
 				{
 					map_dis.image.at<float>( ray.pos().y , ray.pos().x ) = 200; 
 				}
 				
+				//magnitude divided by the distance squared
+				double dist = (params.dist_scale_x/1000 * pow(abs(ray.pos().x - robot_center.x ),2) +  params.dist_scale_y/1000 * pow(abs(ray.pos().y -robot_center.y ),2)) ;
+				float mag = map.image.at<float>( ray.pos().y , ray.pos().x );
 				
-			    //magnitued divided by the distance squared
-
-				 
-			  double dist = (params.dist_scale_x/1000 * pow(abs(ray.pos().x - robot_center.x ),2) +  params.dist_scale_y/1000 * pow(abs(ray.pos().y -robot_center.y ),2)) ;
-
-
-			  float mag = map.image.at<float>( ray.pos().y , ray.pos().x );
-                
-        		
-
-			    
 				twist.linear.x -= (params.twist_scalar_y/1000  * mag/dist * sin(theta));
 				twist.angular.z += (params.twist_scalar_z/1000  * mag/dist * cos(theta));	   
+			}
+			//twist.linear.x = twist.linear.x*100/params.search_res ;
+			//twist.angular.z = twist.angular.z*100/params.search_res ;
 
- 			} 
- 			//twist.linear.x = twist.linear.x*100/params.search_res ;
- 			//twist.angular.z = twist.angular.z*100/params.search_res ;
- 		
 		}	
 	}
-       
+
 	cv::Point2i line;
 
 	line.x = robot_center.x - params.compas_length * twist.angular.z;
 	line.y = robot_center.y - params.compas_length * twist.linear.x;
 			
-	//draw movement
+	//draw the robots heading on the map
 	cv::line(map_dis.image, robot_center, line , 255 , 5);
 	
 	//draw target
 	line.y = robot_center.y - params.compas_length * sin(target.target_heading);
 	line.x = robot_center.x - params.compas_length * cos(target.target_heading);
 	
-	
+	//Draw the destination line on the map
 	cv::line(map_dis.image, robot_center,line,255 , 3);   
-    
-  return twist; 
+
+	return twist;
 }
 
 /***********************************************************
@@ -392,13 +368,13 @@ geometry_msgs::Twist stop_robot()
 	
 	twist.linear.x = 0;
 	twist.linear.y = 0;
-  twist.linear.z = 0;
+	twist.linear.z = 0;
     
-  twist.angular.x = 0;
-  twist.angular.y = 0;
-  twist.angular.z = 0;
+	twist.angular.x = 0;
+	twist.angular.y = 0;
+	twist.angular.z = 0;
     
-  return twist;
+	return twist;
 }
 
 /*
@@ -433,45 +409,46 @@ void check_queue()
 
 /***********************************************************
 * @fn main(int argc, char **argv)
-* @brief starts the Pot_Nav node and publishises twist when 
-* it gets a new image asuming 30 hz
+* @brief starts the Pot_Nav node and publishes twist when
+* it gets a new image assuming 30Hz
 ***********************************************************/
 int main(int argc, char **argv)
 {
+	//Create ros things
 	ros::init(argc, argv, "Pot_Nav");
-  ros::NodeHandle n;
-  image_transport::ImageTransport it(n);
-    
-  target.target_heading = pi/2;
-  target.distance = 0;
-  target.waypoint = 0;
-  target.stop_robot = false;
-  target.done = false;
+	ros::NodeHandle n;
+	image_transport::ImageTransport it(n);
 
-  //setup dynamic reconfigure
+	target.target_heading = pi/2;
+	target.distance = 0;
+	target.waypoint = 0;
+	target.stop_robot = false;
+	target.done = false;
+
+	//setup dynamic reconfigure
 	dynamic_reconfigure::Server<mst_navigation::Pot_Nav_ParamsConfig> srv;
-  dynamic_reconfigure::Server<mst_navigation::Pot_Nav_ParamsConfig>::CallbackType f;
-  f = boost::bind(&setparamsCallback, _1, _2);
+	dynamic_reconfigure::Server<mst_navigation::Pot_Nav_ParamsConfig>::CallbackType f;
+	f = boost::bind(&setparamsCallback, _1, _2);
 	srv.setCallback(f);
 
 	//create subsctiptions
-  //image_sub_edges = it.subscribe( n.resolveName("image_edges") , 10, edgesCallback );
+	//image_sub_edges = it.subscribe( n.resolveName("image_edges") , 10, edgesCallback );
     
-  image_sub_stat = it.subscribe( n.resolveName("image_stat") , 10, statCallback );
+	image_sub_stat = it.subscribe( n.resolveName("image_stat") , 10, statCallback );
     
-  target_sub = n.subscribe( "/target" , 5, targetCallback );
+	target_sub = n.subscribe( "/target" , 5, targetCallback );
 
-  //create publishers
-  twist_pub = n.advertise<geometry_msgs::Twist>( "nav_twist" , 5 );
-  map_pub = it.advertise( "map" , 5 );
+	//create publishers
+	twist_pub = n.advertise<geometry_msgs::Twist>( "nav_twist" , 5 );
+	map_pub = it.advertise( "map" , 5 );
     
-  //set rate to 30 hz
-  ros::Rate loop_rate(60);
+	//set rate to 30 hz
+	ros::Rate loop_rate(60);
     
-  //run main loop
+	//run main loop
 	while (ros::ok())
-  {
-	  //check calbacks
+	{
+		//check calbacks
 		ros::spinOnce();
 		
 		//finds and publishes new twist
