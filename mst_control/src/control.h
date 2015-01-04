@@ -100,7 +100,8 @@ enum Mode
 {
     standby,
     xbox_mode,
-    autonomous
+    autonomous,
+	diff_mode
 };
 Mode mode_;
 

@@ -38,6 +38,34 @@ void pos_callback(const mst_position::target_heading::ConstPtr& msg)
         }
 }
 
+
+/*******************************************************************************
+* @fn check_mode(const sensor_msgs::Joy::ConstPtr& joy)
+* @brief Check to see if the mode needs to be changed
+* @param joy the message from joy node
+* @pre A valid joy message has been recieved
+* @post The robot state will switch if needed
+*******************************************************************************/
+void check_mode(const sensor_msgs::Joy::ConstPtr& joy) {
+	//Check to see if the mode needs to be changed
+	if (check_togg(joy->buttons[joy_button_Y], joy_button_Y))
+	{
+		change_mode(autonomous);
+	}
+	else if (check_togg(joy->buttons[joy_button_B], joy_button_B))
+	{
+		change_mode(standby);
+	}
+    else if(check_togg(joy->buttons[joy_button_A], joy_button_A))
+    {
+        change_mode(xbox_mode);
+    }
+    else if(check_togg(joy->buttons[joy_button_X], joy_button_X))
+    {
+        change_mode(diff_mode);
+    }
+}
+
 /*******************************************************************************
 * @fn xbox_callback(const sensor_msgs::Joy::ConstPtr& joy)
 * @brief callback function for the xbox controller, maps the inputs from joy to
@@ -73,44 +101,39 @@ void xbox_callback(const sensor_msgs::Joy::ConstPtr& joy)
 
 			//Controller Behavior in controller mode
 			//Check to see if the mode needs to be changed
-			if(check_togg(joy->buttons[joy_button_Y], joy_button_Y))
-			{
-				//Change to autonomous
-				change_mode(autonomous);
-			}
-			else if(check_togg(joy->buttons[joy_button_B], joy_button_B))
-			{
-				//Change to standby
-				change_mode(standby);
-			}
+			check_mode(joy);
 
 			//Modify the twist message to send to the motors
 			geometry_twist.angular.z = (joy_rightstick_y)  * ROT_SPEED;
 			geometry_twist.linear.x  = (joy_leftstick_x)   * LINEAR_SPEED;
 			break;
 
-    	case autonomous:
-    		//Check to see if the mode should be changed
-    		if(check_togg(joy->buttons[joy_button_B], joy_button_B))
-			{
-				change_mode(standby);
-			}
-    		else if(check_togg(joy->buttons[joy_button_A], joy_button_B))
-			{
-				change_mode(xbox_mode);
-			}
+    	case diff_mode:
+    		//initalize twist
+			geometry_twist.angular.x = 0;
+			geometry_twist.angular.y = 0;
+			geometry_twist.angular.z = 0;
+			geometry_twist.linear.x = 0;
+			geometry_twist.linear.y = 0;
+			geometry_twist.linear.z = 0;
+
+			//Controller Behavior in controller mode
+			//Check to see if the mode needs to be changed
+			check_mode(joy);
+
+			// normalize the trigger values from [-1.0, 1.0] to [0.0, 1.0]
+			joy_r_trigger = (1.0f - joy_r_trigger) / (2.0f);
+			joy_l_trigger = (1.0f - joy_l_trigger) / (2.0f);
+
+			//Modify the twist message to send to the motors
+			geometry_twist.linear.x = -(joy_r_trigger) * LINEAR_SPEED;
+			geometry_twist.linear.x += (joy_l_trigger) * LINEAR_SPEED;
 			break;
 
+    	case autonomous:
     	case standby:
     		//Check to see if the mode should be changed
-            if(check_togg(joy->buttons[joy_button_Y], joy_button_Y))
-            {
-                change_mode(autonomous);
-            }
-            else if(check_togg(joy->buttons[joy_button_A], joy_button_A))
-            {
-                change_mode(xbox_mode);
-            }
+			check_mode(joy);
             break;
     }
 }
@@ -219,6 +242,7 @@ int main(int argc, char **argv)
 				break;
 
         	case xbox_mode:
+        	case diff_mode:
         		//Light should be solid
         		lightPulse.data = 0;
 				light_pub.publish(lightPulse);
@@ -300,6 +324,10 @@ void change_mode(Mode new_mode)
     else if (mode_ == xbox_mode)
     {
         ROS_INFO("Control: Xbox Mode");
+    }
+    else if (mode_ == diff_mode)
+    {
+        ROS_INFO("Control: Manual Differential Drive Mode");
     }
 }
 
