@@ -237,20 +237,20 @@ geometry_msgs::Twist find_twist()
 	cv::Point2i box_1;
 	cv::Point2i box_2;
 
+	map.image.copyTo(map_dis.image);
+	map_dis.header = map.header;
+	map_dis.encoding = map.encoding;
 
 	//find bottom center of the image
 	robot_center.x = map.image.cols / 2;
 	robot_center.y = map.image.rows - 1;
 
+	//Find the corners of the box which will be ignored as part of the robot
 	box_1.x = robot_center.x - params.robot_x;
 	box_1.y = robot_center.y - params.robot_y;
 
 	box_2.x = robot_center.x + params.robot_x;
 	box_2.y = robot_center.y + params.robot_y;
-
-	map.image.copyTo(map_dis.image);
-	map_dis.header = map.header;
-	map_dis.encoding = map.encoding;
 
 	//draw box in place of robot
 	cv::rectangle(map_dis.image, box_1, box_2 , 255 ,-2*params.robot_filled+1);
@@ -261,7 +261,7 @@ geometry_msgs::Twist find_twist()
 	//draw the search radius
 	cv::circle(map_dis.image, robot_center, params.search_radius, 255);
 
-	//initialize twist and apply forward foring funciton
+	//initialize twist and apply forward foring function
 	twist.linear.y = 0;
 	twist.linear.x = params.carrot_on_a_stick;
 	twist.linear.z = 0;
@@ -272,7 +272,7 @@ geometry_msgs::Twist find_twist()
 
 	//add  in target
 	//ignoring y for now
-	/*twist.linear.x += (params.target_weight_y/100.0) * sin(target.target_heading)/ (target.distance * params.target_dist_scale/1000) ;*/
+	/*twist.linear.x += (params.target_weight_y/100.0) * sin(target.target_heading) / (target.distance * params.target_dist_scale/1000) ;*/
 
 	int sign = 1;
 	if (cos(target.target_heading) < 0)
@@ -285,6 +285,7 @@ geometry_msgs::Twist find_twist()
 	ROS_INFO("y: %f x: %f twist: %f ", sin(target.target_heading) , cos(target.target_heading), twist.angular.z );
 
 	//compute twist
+	//Iterate over every ray on the map image
 	for(int deg = 0 ;  deg <= params.search_res ; deg++ )
 	{
 		float degree = deg;
@@ -308,6 +309,7 @@ geometry_msgs::Twist find_twist()
 		
 		cv::LineIterator ray(map.image, robot_center, search_edge , 8);
 		
+		//Iterate over each point in the ray
 		for(int pos = 0 ; pos < ray.count ; pos++ , ++ray)
 		{
 
@@ -327,10 +329,13 @@ geometry_msgs::Twist find_twist()
 				}
 				
 				//magnitude divided by the distance squared
-				double dist = (params.dist_scale_x/1000 * pow(abs(ray.pos().x - robot_center.x ),2) +  params.dist_scale_y/1000 * pow(abs(ray.pos().y -robot_center.y ),2)) ;
+				double dist = (params.dist_scale_x/1000 * pow(abs(ray.pos().x - robot_center.x ),2) +  params.dist_scale_y/1000 * pow(abs(ray.pos().y -robot_center.y ),2));
 				float mag = map.image.at<float>( ray.pos().y , ray.pos().x );
 				
+				//Slow down based on the distance to an object
 				twist.linear.x -= (params.twist_scalar_y/1000  * mag/dist * sin(theta));
+
+				//Adjust turning speed based on distance to an object
 				twist.angular.z += (params.twist_scalar_z/1000  * mag/dist * cos(theta));	   
 			}
 			//twist.linear.x = twist.linear.x*100/params.search_res ;
@@ -377,7 +382,7 @@ geometry_msgs::Twist stop_robot()
 	return twist;
 }
 
-/*
+/* This has to do with edges and should be reintegrated
 void check_queue()
 {
 
@@ -414,11 +419,12 @@ void check_queue()
 ***********************************************************/
 int main(int argc, char **argv)
 {
-	//Create ros things
+	//Create ros objects
 	ros::init(argc, argv, "Pot_Nav");
 	ros::NodeHandle n;
 	image_transport::ImageTransport it(n);
 
+	//Setup the first target
 	target.target_heading = pi/2;
 	target.distance = 0;
 	target.waypoint = 0;
@@ -431,24 +437,23 @@ int main(int argc, char **argv)
 	f = boost::bind(&setparamsCallback, _1, _2);
 	srv.setCallback(f);
 
-	//create subsctiptions
+	//Create subscriptions
+	//Edges are not currently used
 	//image_sub_edges = it.subscribe( n.resolveName("image_edges") , 10, edgesCallback );
-    
 	image_sub_stat = it.subscribe( n.resolveName("image_stat") , 10, statCallback );
-    
 	target_sub = n.subscribe( "/target" , 5, targetCallback );
 
-	//create publishers
+	//Create publishers
 	twist_pub = n.advertise<geometry_msgs::Twist>( "nav_twist" , 5 );
 	map_pub = it.advertise( "map" , 5 );
     
-	//set rate to 30 hz
+	//set rate to 30Hz
 	ros::Rate loop_rate(60);
     
 	//run main loop
 	while (ros::ok())
 	{
-		//check calbacks
+		//Check for any new messages
 		ros::spinOnce();
 		
 		//finds and publishes new twist
@@ -457,7 +462,7 @@ int main(int argc, char **argv)
 		{
 			geometry_msgs::Twist twist;
 			
-			/*
+			/* This block has to do with edges
 			map.image = map.image * params.previous_per/100 + stat_q.front() + edges_q.front() ;
 			
 			stat_time_q.pop();
@@ -468,6 +473,7 @@ int main(int argc, char **argv)
 			
 			map.image = map.image * params.previous_per/100 + stat;
 			
+			//Check if the robot has reached the last waypoint
 			if(target.stop_robot)
 			{
 				twist = find_twist(); 
@@ -475,6 +481,7 @@ int main(int argc, char **argv)
 			}
 			else
 			{
+				//Find optimal direction to next target
 				twist = find_twist(); 
 			}
 			
