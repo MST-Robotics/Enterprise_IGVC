@@ -59,11 +59,14 @@ double                          inital_lat;
 double                          inital_lon;
 double                          inital_head;
 
-double                          way_lat[10];
-double                          way_lon[10];
-int                             way_priority[10];
-double                          way_limit[10];
-bool                            waypoint_complete[10];
+struct waypoint {
+    double lat, lng;
+    int priority;
+    double limit;
+    bool complete;
+};
+
+waypoint                        way[10];
 
 bool                            skip_waypoint;
 bool                            stoped;
@@ -207,7 +210,7 @@ void send_target(bool skip) {
     //gps_fix = false;
 
     for (int i = 0; i < 10; i++) {
-        if (way_priority[i] == current_priority && !waypoint_complete[i]) {
+        if (way[i].priority == current_priority && !way[i].complete) {
             potential_waypoints.push_back(i);
         }
     }
@@ -234,8 +237,8 @@ void send_target(bool skip) {
 
             // find distance using haversine formula
             int index = potential_waypoints[j];
-            double lat = way_lat[index] / 180 * pi;
-            double lon = way_lon[index] / 180 * pi;
+            double lat = way[index].lat / 180 * pi;
+            double lon = way[index].lng / 180 * pi;
             //earths radius times c
             double dist = find_dist(current_lat, current_lon, chosen_lat,
                     chosen_lon);
@@ -252,7 +255,7 @@ void send_target(bool skip) {
         }
 
         if (chosen_dist <= params.waypoint_radius || skip) {
-            waypoint_complete[chosen_index] = true;
+            way[chosen_index].complete = true;
             skip_waypoint = false;
             send_target(false);
         } else {
@@ -279,7 +282,7 @@ void reset_waypoints() {
     read_waypoints();
     for (int i = 0; i < 10; i++) {
         //reset the waypoint complete values
-        waypoint_complete[i] = false;
+        way[i].complete = false;
     }
 
     if (params.reverse_order) {
@@ -345,68 +348,67 @@ double find_heading(double lat1, double lon1, double lat2, double lon2) {
  * @brief reads gps waypoinds from dynamic reconfigure
  * @pre has to have global arrays to place params in
  * @todo this should be replaced with reading a file
- * @todo arrays should be a vector of structs
  ***********************************************************/
 void read_waypoints() {
     //read in waypoint 1
-    way_lat[0] = params.way_1_latitude;
-    way_lon[0] = params.way_1_longitude;
-    way_priority[0] = params.way_1_priority;
-    way_limit[0] = params.way_1_limit;
+    way[0].lat = params.way_1_latitude;
+    way[0].lng = params.way_1_longitude;
+    way[0].priority = params.way_1_priority;
+    way[0].limit = params.way_1_limit;
 
     //read in waypoint 2
-    way_lat[1] = params.way_2_latitude;
-    way_lon[1] = params.way_2_longitude;
-    way_priority[1] = params.way_2_priority;
-    way_limit[1] = params.way_2_limit;
+    way[1].lat = params.way_2_latitude;
+    way[1].lng = params.way_2_longitude;
+    way[1].priority = params.way_2_priority;
+    way[1].limit = params.way_2_limit;
 
     //read in waypoint 3
-    way_lat[2] = params.way_3_latitude;
-    way_lon[2] = params.way_3_longitude;
-    way_priority[2] = params.way_3_priority;
-    way_limit[2] = params.way_3_limit;
+    way[2].lat = params.way_3_latitude;
+    way[2].lng = params.way_3_longitude;
+    way[2].priority = params.way_3_priority;
+    way[2].limit = params.way_3_limit;
 
     //read in waypoint 4
-    way_lat[3] = params.way_4_latitude;
-    way_lon[3] = params.way_4_longitude;
-    way_priority[3] = params.way_4_priority;
-    way_limit[3] = params.way_4_limit;
+    way[3].lat = params.way_4_latitude;
+    way[3].lng = params.way_4_longitude;
+    way[3].priority = params.way_4_priority;
+    way[3].limit = params.way_4_limit;
 
     //read in waypoint 5
-    way_lat[4] = params.way_5_latitude;
-    way_lon[4] = params.way_5_longitude;
-    way_priority[4] = params.way_5_priority;
-    way_limit[4] = params.way_5_limit;
+    way[4].lat = params.way_5_latitude;
+    way[4].lng = params.way_5_longitude;
+    way[4].priority = params.way_5_priority;
+    way[4].limit = params.way_5_limit;
 
     //read in waypoint 6
-    way_lat[5] = params.way_6_latitude;
-    way_lon[5] = params.way_6_longitude;
-    way_priority[5] = params.way_6_priority;
-    way_limit[5] = params.way_5_limit;
+    way[5].lat = params.way_6_latitude;
+    way[5].lng = params.way_6_longitude;
+    way[5].priority = params.way_6_priority;
+    way[5].limit = params.way_5_limit;
 
     //read in waypoint 7
-    way_lat[6] = params.way_7_latitude;
-    way_lon[6] = params.way_7_longitude;
-    way_priority[6] = params.way_7_priority;
-    way_limit[6] = params.way_7_limit;
+    way[6].lat = params.way_7_latitude;
+    way[6].lng = params.way_7_longitude;
+    way[6].priority = params.way_7_priority;
+    way[6].limit = params.way_7_limit;
 
     //read in waypoint 8
-    way_lat[7] = params.way_8_latitude;
-    way_lon[7] = params.way_8_longitude;
-    way_priority[7] = params.way_8_priority;
-    way_limit[7] = params.way_7_limit;
+    way[7].lat = params.way_8_latitude;
+    way[7].lng = params.way_8_longitude;
+    way[7].priority = params.way_8_priority;
+    way[7].limit = params.way_7_limit;
 
     //read in waypoint 9
-    way_lat[8] = params.way_9_latitude;
-    way_lon[8] = params.way_9_longitude;
-    way_priority[8] = params.way_9_priority;
-    way_limit[8] = params.way_8_limit;
+    way[8].lat = params.way_9_latitude;
+    way[8].lng = params.way_9_longitude;
+    way[8].priority = params.way_9_priority;
+    way[8].limit = params.way_8_limit;
 
     //read in waypoint 10
-    way_lat[9] = params.way_10_latitude;
-    way_lon[9] = params.way_10_longitude;
-    way_priority[9] = params.way_10_priority;
-    way_limit[9] = params.way_10_limit;
+    way[9].lat = params.way_10_latitude;
+    way[9].lng = params.way_10_longitude;
+    way[9].priority = params.way_10_priority;
+    way[9].limit = params.way_10_limit;
 
 }
 
@@ -418,13 +420,13 @@ int find_target() {
             && ((current_priority <= 10 && !params.reverse_order)
                     || (current_priority >= 1 && params.reverse_order))) {
         for (int i = 0; i < 10; i++) {
-            if (!waypoint_complete[i] && way_priority[i] != 0
-                    && (((way_priority[i] <= current_priority)
+            if (!way[i].complete && way[i].priority != 0
+                    && (((way[i].priority <= current_priority)
                             && !params.reverse_order)
-                            || ((way_priority[i] >= current_priority)
+                            || ((way[i].priority >= current_priority)
                                     && params.reverse_order))) {
-                double lat = way_lat[i] / 180 * pi;
-                double lon = way_lon[i] / 180 * pi;
+                double lat = way[i].lat / 180 * pi;
+                double lon = way[i].lng / 180 * pi;
                 ROS_INFO("Lat: %f Lon: %f", lat, lon);
                 double dist = find_dist(current_lat, current_lon, lat, lon);
 
@@ -450,8 +452,8 @@ int find_target() {
 
 mst_position::target_heading compute_msg(int target) {
     mst_position::target_heading heading;
-    double lat = way_lat[target] / 180 * pi;
-    double lon = way_lon[target] / 180 * pi;
+    double lat = way[target].lat / 180 * pi;
+    double lon = way[target].lng / 180 * pi;
 
     heading.target_heading = current_head
             - find_heading(current_lat, current_lon, lat, lon);
@@ -522,10 +524,10 @@ geometry_msgs::PoseStamped relative_waypoint(int target) {
     waypoint.header.stamp = current_time;
     waypoint.header.frame_id = "goal";
 
-    double dist = find_dist(current_lat, current_lon, way_lat[target],
-            way_lon[target]);
-    double theta = find_heading(current_lat, current_lon, way_lat[target],
-            way_lon[target]);
+    double dist = find_dist(current_lat, current_lon, way[target].lat,
+            way[target].lng);
+    double theta = find_heading(current_lat, current_lon, way[target].lat,
+            way[target].lng);
     waypoint.pose.position.x = cos(theta) * dist;
     waypoint.pose.position.y = sin(theta) * dist;
     waypoint.pose.position.z = 0;
@@ -589,10 +591,10 @@ int main(int argc, char **argv) {
 
             if (target_heading.distance <= params.waypoint_radius
                     || skip_waypoint
-                    || (way_limit[target_waypoint] == 0
+                    || (way[target_waypoint].limit == 0
                             && target_heading.distance
                                     <= params.dummy_point_radius)) {
-                waypoint_complete[target_waypoint] = true;
+                way[target_waypoint].complete = true;
                 target_waypoint = find_target();
                 if (target_waypoint == -1) {
                     //robot is done
@@ -616,7 +618,7 @@ int main(int argc, char **argv) {
                 target_heading.distance = 2200000;
             }
 
-            if (way_limit[target_waypoint] == 0) {
+            if (way[target_waypoint].limit == 0) {
                 target_heading.target_heading = pi / 2;
             }
 
