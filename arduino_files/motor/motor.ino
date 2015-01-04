@@ -24,8 +24,8 @@ int loopCount = 0;
 const int
 Lmotor   = 3,
 Rmotor   = 11,
-Ldir     = 12,
-Rdir     = 13,
+Ldir     = 13,
+Rdir     = 12,
 Light    = 7,
 SNS_A    = A0;
 
