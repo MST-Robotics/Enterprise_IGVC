@@ -62,8 +62,8 @@ ros::Publisher                  light_pub;
 * Global variables
 ***********************************************************/
 
-const float ROT_SPEED    = 12.0;
-const float LINEAR_SPEED = 12.0;
+const float ROT_SPEED    = 6.0;
+const float LINEAR_SPEED = 6.0;
 
 
 /*-----------------------------------
