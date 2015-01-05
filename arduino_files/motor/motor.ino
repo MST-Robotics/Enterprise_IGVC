@@ -73,8 +73,8 @@ void LightCallback(const std_msgs::Int8 &msg)
 const float TURNS_PER_SEC = GEAR_RATIO / (2.0 * WHEEL_RAD * M_PI);
 const float TURN_OFFSET = TURNS_PER_SEC * ROBOT_RAD;
 
-ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel_throttle",&TwistCallback);
-ros::Subscriber<std_msgs::Int8> lightSub("indicator_light_throttle", &LightCallback);
+ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel",&TwistCallback);
+ros::Subscriber<std_msgs::Int8> lightSub("indicator_light", &LightCallback);
 ros::Publisher p("deBug", &test);
 
 void setup()
