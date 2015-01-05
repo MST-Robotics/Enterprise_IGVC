@@ -42,7 +42,6 @@
 ros::Subscriber                 xbox_state_sub;
 ros::Subscriber                 s_msg;
 ros::Subscriber                 nav_sub;
-ros::Subscriber                 pos_sub;
 
 
 /***********************************************************

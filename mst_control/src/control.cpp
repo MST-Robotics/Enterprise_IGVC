@@ -186,7 +186,6 @@ int main(int argc, char **argv) {
 
     //Create subscriptions
     nav_sub = n.subscribe(nav, 100, navigation_callback);
-    pos_sub = n.subscribe("/target", 100, pos_callback);
     xbox_state_sub = n.subscribe<sensor_msgs::Joy>("joy", 1, xbox_callback);
 
     //Create publishers
