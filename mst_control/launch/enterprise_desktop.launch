@@ -24,7 +24,9 @@
     <node name="rviz_desktop" pkg="rviz" type="rviz" args="-d $(find mst_control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
     
     <!-- launch joy package-->
-    <node pkg="joy" type="joy_node" name="joy_node" respawn="true"  />
+    <node pkg="joy" type="joy_node" name="joy_node" respawn="true">
+        <param name="deadzone" value=".1"/>
+    </node>
     
     <!-- Camera Node (camera1394)-->
     <!--_video_mode="640x480_mono8" _iso_speed="400" _frame_rate="15"-->
