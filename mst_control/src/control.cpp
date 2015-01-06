@@ -12,28 +12,6 @@
  *******************************************************************************/
 
 /*******************************************************************************
- * @fn pos_callback(const mst_position::Target_Heading::ConstPtr& msg)
- * @brief callback function for the target heading
- * @param mst_position::Target_Heading::ConstPtr& msg A Target_Heading message
- *        which checks if the robot has reached the last waypoint
- * @pre Waypoints exist in parameter server
- * @post The robot will travel to each waypoint before finishing
- *******************************************************************************/
-void pos_callback(const mst_position::target_heading::ConstPtr& msg) {
-    if (msg->done && !done_togg) {
-        change_mode(standby);
-        done_togg = true;
-    } else if (!msg->done) {
-        done_togg = false;
-    }
-
-    if (msg->waypoint != last_msg_waypoint) {
-        say("moving to next waypoint");
-        last_msg_waypoint = msg->waypoint;
-    }
-}
-
-/*******************************************************************************
  * @fn check_mode(const sensor_msgs::Joy::ConstPtr& joy)
  * @brief Check to see if the mode needs to be changed
  * @param joy the message from joy node
@@ -47,21 +25,47 @@ void check_mode(const sensor_msgs::Joy::ConstPtr& joy) {
     } else if (check_togg(joy->buttons[joy_button_B], joy_button_B)) {
         change_mode(standby);
     } else if (check_togg(joy->buttons[joy_button_A], joy_button_A)) {
-        change_mode(xbox_mode);
+        change_mode(arcade_mode);
     } else if (check_togg(joy->buttons[joy_button_X], joy_button_X)) {
         change_mode(diff_mode);
     }
 }
 
+void update_velocity(float right_vel, float left_vel) {
+
+    mst_control::Velocity velocity;
+
+    //Modify the velocity message to send to the motors
+    velocity.right_vel = abs(right_vel) * MOTOR_SPEED_MAX;
+    velocity.right_dir = right_vel > 0.0f;
+
+    velocity.left_vel = abs(left_vel) * MOTOR_SPEED_MAX;
+    velocity.left_dir = left_vel > 0.0f;
+
+    //Publish the message to the motor controller
+    motor_pub.publish(velocity);
+
+}
+
+float get_right_velocity(float linearVelocity, float angularVelocity) {
+    return (2 * linearVelocity + angularVelocity * 2 * ROBOT_WIDTH)
+            / (2 * WHEEL_RADIUS);
+}
+
+float get_left_velocity(float linearVelocity, float angularVelocity) {
+    return (2 * linearVelocity - angularVelocity * 2 * ROBOT_WIDTH)
+            / (2 * WHEEL_RADIUS);
+}
+
 /*******************************************************************************
- * @fn xbox_callback(const sensor_msgs::Joy::ConstPtr& joy)
+ * @fn joy_callback(const sensor_msgs::Joy::ConstPtr& joy)
  * @brief callback function for the xbox controller, maps the inputs from joy to
  * 		 global variables
  * @param joy the message from joy node
  * @pre A valid joy message has been recieved
  * @post The robot state will switch or the cmd_vel message will change
  *******************************************************************************/
-void xbox_callback(const sensor_msgs::Joy::ConstPtr& joy) {
+void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     //Xbox buttons are defined in the header
 
     //xbox controller axes
@@ -74,45 +78,28 @@ void xbox_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     joy_r_trigger = joy->axes[5];
     joy_l_trigger = joy->axes[2];
 
-    switch (mode_) {
-    case xbox_mode:
-        //initalize twist
-        geometry_twist.angular.x = 0;
-        geometry_twist.angular.y = 0;
-        geometry_twist.angular.z = 0;
-        geometry_twist.linear.x = 0;
-        geometry_twist.linear.y = 0;
-        geometry_twist.linear.z = 0;
+    switch (robot_mode) {
+    case arcade_mode:
 
-        //Controller Behavior in controller mode
+        // send the updated velocity to the motor controller
+        update_velocity(
+            get_right_velocity(joy_leftstick_x, joy_rightstick_y),
+            get_left_velocity(joy_leftstick_x, joy_rightstick_y)
+        );
+
         //Check to see if the mode needs to be changed
         check_mode(joy);
 
-        //Modify the twist message to send to the motors
-        geometry_twist.angular.z = (joy_rightstick_y) * ROT_SPEED;
-        geometry_twist.linear.x = (joy_leftstick_x) * LINEAR_SPEED;
         break;
 
     case diff_mode:
-        //initalize twist
-        geometry_twist.angular.x = 0;
-        geometry_twist.angular.y = 0;
-        geometry_twist.angular.z = 0;
-        geometry_twist.linear.x = 0;
-        geometry_twist.linear.y = 0;
-        geometry_twist.linear.z = 0;
 
-        //Controller Behavior in controller mode
+        // send the updated velocity to the motor controller
+        update_velocity(joy_rightstick_x, joy_leftstick_x);
+
         //Check to see if the mode needs to be changed
         check_mode(joy);
 
-        // normalize the trigger values from [-1.0, 1.0] to [0.0, 1.0]
-        joy_r_trigger = (1.0f - joy_r_trigger) / (2.0f);
-        joy_l_trigger = (1.0f - joy_l_trigger) / (2.0f);
-
-        //Modify the twist message to send to the motors
-        geometry_twist.linear.x = -(joy_r_trigger) * LINEAR_SPEED;
-        geometry_twist.linear.x += (joy_l_trigger) * LINEAR_SPEED;
         break;
 
     case autonomous:
@@ -128,18 +115,18 @@ void xbox_callback(const sensor_msgs::Joy::ConstPtr& joy) {
  * @brief decides on forwarding navigation comands to the motors
  * @pre takes in a ros message of a twist from navigation and
  *      needs mode variable to be initalized
- * @post publishes a CV_32FC1 image using cv_bridge
- * @param takes in a ros message of a raw or cv image
+ * @post updates the nav_twist variable if we're in autonomous mode
+ * @param a ros message of a twist from navigation
  ***********************************************************/
 void navigation_callback(const geometry_msgs::Twist twist) {
-    if (mode_ == autonomous) {
-        //initalize twist
-        nav_twist.angular.x = 0;
-        nav_twist.angular.y = 0;
-        nav_twist.angular.z = twist.angular.z;
-        nav_twist.linear.x = twist.linear.x;
-        nav_twist.linear.y = 0;
-        nav_twist.linear.z = 0;
+    if (robot_mode == autonomous) {
+
+        float rightVel = get_right_velocity(twist.linear.x, twist.angular.z);
+        float leftVel = get_left_velocity(twist.linear.x, twist.angular.z);
+
+        // send the updated velocity to the motor controller
+        update_velocity(rightVel, leftVel);
+
     }
 }
 
@@ -149,8 +136,7 @@ void navigation_callback(const geometry_msgs::Twist twist) {
  * @pre has to have the setup for the reconfigure gui
  * @post changes the parameters
  ***********************************************************/
-void setparamsCallback(mst_control::Control_ParamsConfig &config,
-        uint32_t level) {
+void setparamsCallback(mst_control::Control_ParamsConfig &config, uint32_t level) {
     // Get the parameters from the parameter server
     params = config;
 }
@@ -163,14 +149,9 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "Control");
     ros::NodeHandle n;
 
-    //Light Information
-    std_msgs::Int8 lightPulse;
-    lightPulse.data = 0;
-
     //Setup initial robot state variables
-    bool stopped = true;
     robot_init = true;
-    mode_ = standby;
+    robot_mode = standby;
     autonomous_mode = navigation;
 
     //Find the topic name
@@ -179,18 +160,18 @@ int main(int argc, char **argv) {
 
     //Ensure that the twist topic from autonomous is named nav_twist
     if (nav == "nav_twist") {
-        ROS_WARN(
-                "Control: navigation twist has not been remapped! Typical command-line usage:\n"
-                        "\t$ ./Contestop_pubrol twist:=<twist topic> [transport]");
+        ROS_WARN("Control: navigation twist has not been remapped! "
+                "Typical command-line usage:\n"
+                "\t$ ./Contestop_pubrol twist:=<twist topic> [transport]");
     }
 
     //Create subscriptions
     nav_sub = n.subscribe(nav, 100, navigation_callback);
-    xbox_state_sub = n.subscribe<sensor_msgs::Joy>("joy", 1, xbox_callback);
+    xbox_state_sub = n.subscribe<sensor_msgs::Joy>("joy", 1, joy_callback);
 
     //Create publishers
-    motor_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);
-    light_pub = n.advertise<std_msgs::Int8>("indicator_light", 1);
+    motor_pub = n.advertise<mst_control::Velocity>("cmd_vel", 1);
+    light_pub = n.advertise<std_msgs::UInt8>("indicator_light", 1);
 
     //Set ros loop rate to 30Hz
     ros::Rate loop_rate(30);
@@ -202,50 +183,13 @@ int main(int argc, char **argv) {
 
         if (robot_init) {
             //First time initialization
-            say(
-                    "Hello World. My name is S and T Enterprise. Please press the EX box button to connect");
+            say("Hello World. My name is S and T Enterprise. "
+                    "Please press the EX box button to connect");
             robot_init = false;
         }
 
-        switch (mode_) {
-        case standby:
-            //Light should be solid
-            lightPulse.data = 0;
-            light_pub.publish(lightPulse);
-
-            //Ensure the robot isn't moving
+        if (robot_mode == standby)
             stop_robot();
-            stopped = true;
-
-            break;
-
-        case xbox_mode:
-        case diff_mode:
-            //Light should be solid
-            lightPulse.data = 0;
-            light_pub.publish(lightPulse);
-
-            //Publish the message created from joy
-            motor_pub.publish(geometry_twist);
-            stopped = false;
-
-            break;
-
-        case autonomous:
-            //Light should blink
-            lightPulse.data = 1;
-            light_pub.publish(lightPulse);
-
-            //Publish the twist message created from navigation
-            motor_pub.publish(nav_twist);
-            stopped = false;
-
-            break;
-
-        default:
-            stop_robot();
-            stopped = true;
-        }
 
         //Wait until the 30Hz interval has ended
         loop_rate.sleep();
@@ -277,23 +221,45 @@ bool check_togg(bool button_state, int button_position) {
     return togg;
 }
 
+
+/*******************************************************************************
+ * @fn update_light(uint8_t value)
+ * @brief Update the light to the specified value and publish a message
+ * @post A new message is published with the specified light value
+ * @param uint8_t value the new value for the light
+ *******************************************************************************/
+void update_light(uint8_t value) {
+    std_msgs::UInt8 lightPulse;
+    lightPulse.data = value;
+    light_pub.publish(lightPulse);
+}
+
 /*******************************************************************************
  * @fn change_mode(Mode new_mode)
- * @brief Changes the global variable for robot mode
- * @post Robot mode is changed to new_mode
+ * @brief Changes the global variable for robot mode and updates the light
+ * @post Robot mode is changed to new_mode and light is updated correctly
  * @param Mode new_mode the new mode to change the robot to
  *******************************************************************************/
 void change_mode(Mode new_mode) {
-    mode_ = new_mode;
+    robot_mode = new_mode;
 
-    if (mode_ == standby) {
+    switch (robot_mode) {
+    case standby:
         ROS_INFO("Control: Standby Mode");
-    } else if (mode_ == autonomous) {
+        update_light(0);
+        break;
+    case autonomous:
         ROS_INFO("Control: Autonomous Mode");
-    } else if (mode_ == xbox_mode) {
-        ROS_INFO("Control: Xbox Mode");
-    } else if (mode_ == diff_mode) {
-        ROS_INFO("Control: Manual Differential Drive Mode");
+        update_light(1);
+        break;
+    case arcade_mode:
+        ROS_INFO("Control: Manual Xbox Arcade Drive Mode");
+        update_light(0);
+        break;
+    case diff_mode:
+        ROS_INFO("Control: Manual Xbox Differential Drive Mode");
+        update_light(0);
+        break;
     }
 }
 
@@ -316,19 +282,10 @@ void say(std::string say) {
 
 /*******************************************************************************
  * @fn stop_robot()
- * @brief stops the robot from moving by sending a twist message populated by 0s
+ * @brief stops the robot from moving by sending a velocity message with 0s
  * @pre Robot should be initialized
  * @post The robot is no longer moving
  *******************************************************************************/
 void stop_robot() {
-    geometry_msgs::Twist stop_twist;
-
-    stop_twist.angular.x = 0;
-    stop_twist.angular.y = 0;
-    stop_twist.angular.z = 0;
-    stop_twist.linear.x = 0;
-    stop_twist.linear.y = 0;
-    stop_twist.linear.z = 0;
-
-    motor_pub.publish(stop_twist);
+    update_velocity(0.0f, 0.0f);
 }

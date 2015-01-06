@@ -23,7 +23,8 @@
 #include <mst_position/target_heading.h>
 #include "sensor_msgs/Joy.h"
 #include "geometry_msgs/Vector3.h"
-#include <std_msgs/Int8.h>
+#include <std_msgs/UInt8.h>
+#include <mst_control/Velocity.h>
 
 /***********************************************************
 * Other includes
@@ -40,7 +41,6 @@
 * Subscribers
 ***********************************************************/
 ros::Subscriber                 xbox_state_sub;
-ros::Subscriber                 s_msg;
 ros::Subscriber                 nav_sub;
 
 
@@ -49,21 +49,26 @@ ros::Subscriber                 nav_sub;
 ***********************************************************/
 
 
-//ros::Publisher                wiimote_rum_pub; Switch out for xbox rumble
 ros::Publisher                  motor_pub;
-ros::Publisher                  p_cmd_vel;
 ros::Publisher                  sound_pub;
 ros::Publisher                  light_pub;
 
 
 
 /***********************************************************
-* Global variables
+* Constants
 ***********************************************************/
+
+const float ROBOT_WIDTH  = 0.26; //meters
+const float WHEEL_RADIUS  = 0.19; //meters
 
 const float ROT_SPEED    = 6.0;
 const float LINEAR_SPEED = 6.0;
 
+const float JOY_TRIGGER_MAX = 1.0f;
+const float JOY_TRIGGER_MIN = -1.0f;
+
+const uint8_t MOTOR_SPEED_MAX = 100;
 
 /*-----------------------------------
 	Velocity and sensor data variables
@@ -98,11 +103,11 @@ const float LINEAR_SPEED = 6.0;
 enum Mode
 {
     standby,
-    xbox_mode,
+    arcade_mode,
     autonomous,
 	diff_mode
 };
-Mode mode_;
+Mode robot_mode;
 
 //Enumerator for autonomous mode
 enum Autonomous_Mode
@@ -114,8 +119,6 @@ Autonomous_Mode autonomous_mode;
 
 mst_control::Control_ParamsConfig params;
 
-geometry_msgs::Twist nav_twist;           //Autonomous Navigation
-
 /***************************************************************** 
 *This is where we changed it from wii_twist to geometry_twist.
 *If using a different remote in the future, assign geometry_twist
@@ -123,7 +126,6 @@ geometry_msgs::Twist nav_twist;           //Autonomous Navigation
 *
 *See xbox_callback
 ******************************************************************/
-geometry_msgs::Twist geometry_twist;      
 bool xtogg[30];
 bool robot_init;
 bool done_togg = 0;

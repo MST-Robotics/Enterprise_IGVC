@@ -1,167 +1,59 @@
-
-//#include <ArduinoHardware.h>
 #include <ros.h>
 
-#include <geometry_msgs/Twist.h>
+#include <mst_control/Velocity.h>
 #include <std_msgs/Int8.h>
 
-float linearVel;
-float angularVel;
-geometry_msgs::Twist test;
-ros::NodeHandle nh;
-int leftVel, rightVel, leftDir, rightDir, lightMode = 0;
 /*******************************************************************************
-* Constants
-*******************************************************************************/
-const float ROBOT_RAD  = 0.28; //meters
-const float WHEEL_RAD  = 0.20; //meters
-const float GEAR_RATIO = 21.952;    //don't know
-const int   MAX_PUB    = 256;  //This is the max value that can be published
+ * Variables
+ *******************************************************************************/
 
-int loopCount = 0;
+uint8 lightMode = 0;
 
-//Pin
-const int
-Lmotor   = 3,
-Rmotor   = 11,
-Ldir     = 13,
-Rdir     = 12,
-Light    = 7,
-SNS_A    = A0;
+ros::NodeHandle nh;
 
-//Callback from twist which gets a linear and angular velocity 
-void TwistCallback(const geometry_msgs::Twist &msg)
-{
-  //taking subscribed messages from Twist  
-  angularVel = msg.angular.z;
-  linearVel = msg.linear.x;
-  return;
-} 
+ros::Subscriber<mst_control::Velocity> velocitySub("cmd_vel", &VelocityCallback);
+ros::Subscriber<std_msgs::UInt8> lightSub("indicator_light", &LightCallback);
 
-/* For 4 mode light
-void switchMode(int mode)
-{
-  if(lightMode != mode)
-  {  
-    for(int i = 0; i < 2; i++)
-    {
-      digitalWrite(Light, LOW);
-      delay(200);
-      digitalWrite(Light, HIGH);
-      delay(200);
-    }
-    lightMode = mode;
-  }
-}*/
+/*******************************************************************************
+ * Constants
+ *******************************************************************************/
 
-//Callback from light msg, changes mode of the light
-void LightCallback(const std_msgs::Int8 &msg)
-{  
-  lightMode = msg.data;
-  /* Four mode light
-  switch(msg.data)
-  {
-    case 0:
-      switchMode(0);
-      break;
-    case 1:
-      switchMode(1);
-      break;
-  }*/
-}
-  
-const float TURNS_PER_SEC = GEAR_RATIO / (2.0 * WHEEL_RAD * M_PI);
-const float TURN_OFFSET = TURNS_PER_SEC * ROBOT_RAD;
+//Pin configurations
+const int LEFT_VELOCITY = 3;
+const int RIGHT_VELOCITY = 11;
+const int LEFT_DIRECTION = 13;
+const int RIGHT_DIRECTION = 12;
+const int LIGHT = 7;
 
-ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel",&TwistCallback);
-ros::Subscriber<std_msgs::Int8> lightSub("indicator_light", &LightCallback);
-ros::Publisher p("deBug", &test);
-
-void setup()
-{
-  //nh.getHardware()->setBaud(115200);
-  pinMode(Lmotor, OUTPUT);
-  pinMode(Rmotor, OUTPUT);
-  pinMode(Ldir, OUTPUT);
-  pinMode(Rdir, OUTPUT);
-  pinMode(Light, OUTPUT);
-  digitalWrite(Light, LOW);
-  lightMode = 0;
-  nh.initNode();
-  nh.subscribe(sub);
-  nh.subscribe(lightSub);
-  nh.advertise(p);
+// Callback for Velocity which gets the left and right wheel velocity and direction
+void VelocityCallback(const mst_control::Velocity &msg) {
+    analogWrite(LEFT_VELOCITY, msg.left_vel);
+    analogWrite(RIGHT_VELOCITY, msg.right_vel);
+    digitalWrite(LEFT_DIRECTION, msg.left_dir);
+    digitalWrite(RIGHT_DIRECTION, msg.right_dir);
 }
 
-void loop()
-{ 
-  //Left and right velocities
-  /*leftVel = (linearVel * TURNS_PER_SEC) - (TURN_OFFSET * angularVel);
-  rightVel = (linearVel * TURNS_PER_SEC) + (TURN_OFFSET * angularVel);*/
-  rightVel = (2 * linearVel + angularVel * 2 * ROBOT_RAD) / ( 2 * WHEEL_RAD); 
-  leftVel = (2 * linearVel - angularVel * 2 * ROBOT_RAD) / ( 2 * WHEEL_RAD);
-  
-  //Scale motor values
-  rightVel *= (MAX_PUB / 76);
-  leftVel  *= (MAX_PUB / 76);
-  
-  test.linear.x = rightVel;
-  test.linear.y = leftVel;
-  test.angular.x = linearVel;
-  test.angular.y = angularVel;
-  
-  /*
-  if(lightMode == 1)
-  {
-    loopCount++;
-    if(loopCount == 5)
-    {
-      digitalWrite(Light, HIGH);
-      delay(500); 
-      digitalWrite(Light, LOW);
-      loopCount = 0;
-    }
-  }*/
+//Callback from LIGHT msg, changes mode of the LIGHT
+void LightCallback(const std_msgs::UInt8 &msg) {
+    lightMode = msg.data;
+}
+
+void setup() {
+    pinMode(LEFT_VELOCITY, OUTPUT);
+    pinMode(RIGHT_VELOCITY, OUTPUT);
+    pinMode(LEFT_DIRECTION, OUTPUT);
+    pinMode(RIGHT_DIRECTION, OUTPUT);
+    pinMode(LIGHT, OUTPUT);
     
-  //take out any negative values
-  if(abs(leftVel) > MAX_PUB)
-    leftVel = MAX_PUB - 1;
-  if(abs(rightVel) > MAX_PUB)
-    rightVel = MAX_PUB - 1;
-      
-  if(leftVel < 0)
-    leftDir = 0;
-  else
-    leftDir = 1;
+    digitalWrite(LIGHT, LOW);
     
-  if(rightVel < 0)
-    rightDir = 1;
-  else
-    rightDir = 0;
-  /*
-  if(leftDir == rightDir && leftVel <.1 || rightVel <.1)
-  {
-    if (leftDir == 0)
-    {
-      leftVel = 75;
-      rightVel = 0;
-    }
-    if (leftDir == 1)
-    {
-      rightVel = 75;
-      leftVel = 0;
-    }
-  }*/
-  
-  leftVel  = abs(leftVel);
-  rightVel = abs(rightVel);
-  //nh.loginfo("updating"); 
-  analogWrite(Lmotor, leftVel);
-  analogWrite(Rmotor, rightVel);
-  digitalWrite(Ldir, leftDir);
-  digitalWrite(Rdir, rightDir);
-  p.publish(&test);   
-  nh.spinOnce();
-  delay(10);
+    nh.initNode();
+    nh.subscribe(velocitySub);
+    nh.subscribe(lightSub);
+}
+
+void loop() {
+    nh.spinOnce();
+    delay(10);
 }
 
