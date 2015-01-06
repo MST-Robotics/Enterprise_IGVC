@@ -1,18 +1,15 @@
 #include <ros.h>
 
 #include <mst_control/Velocity.h>
-#include <std_msgs/Int8.h>
+#include <std_msgs/UInt8.h>
 
 /*******************************************************************************
  * Variables
  *******************************************************************************/
 
-uint8 lightMode = 0;
+uint8_t lightMode = 0;
 
 ros::NodeHandle nh;
-
-ros::Subscriber<mst_control::Velocity> velocitySub("cmd_vel", &VelocityCallback);
-ros::Subscriber<std_msgs::UInt8> lightSub("indicator_light", &LightCallback);
 
 /*******************************************************************************
  * Constants
@@ -37,6 +34,9 @@ void VelocityCallback(const mst_control::Velocity &msg) {
 void LightCallback(const std_msgs::UInt8 &msg) {
     lightMode = msg.data;
 }
+
+ros::Subscriber<mst_control::Velocity> velocitySub("cmd_vel", &VelocityCallback);
+ros::Subscriber<std_msgs::UInt8> lightSub("indicator_light", &LightCallback);
 
 void setup() {
     pinMode(LEFT_VELOCITY, OUTPUT);
