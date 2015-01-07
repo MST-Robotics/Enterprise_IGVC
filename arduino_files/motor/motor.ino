@@ -15,7 +15,7 @@ uint8_t lightMode = 0;
 unsigned long lightLastMillis = 0;
 bool lightState = LOW;
 
-ros::NodeHandle nh;
+ros::NodeHandle nodeHandle;
 
 
 /*******************************************************************************
@@ -100,9 +100,9 @@ void setup() {
     
     digitalWrite(PIN_LIGHT, LOW);
     
-    nh.initNode();
-    nh.subscribe(velocitySub);
-    nh.subscribe(lightSub);
+    nodeHandle.initNode();
+    nodeHandle.subscribe(velocitySub);
+    nodeHandle.subscribe(lightSub);
 }
 
 
@@ -111,7 +111,7 @@ void setup() {
  *******************************************************************************/
 
 void loop() {
-    nh.spinOnce();
+    nodeHandle.spinOnce();
     updateLight();
 }
 
