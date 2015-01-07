@@ -150,7 +150,7 @@ void updateIMU() {
      
     if((currentMillis - imuLastMillis) > IMU_INTERVAL) {
         // save the last time we updated the IMU 
-        lightLastMillis  = currentMillis;
+        imuLastMillis = currentMillis;
         
         int magx, magy, magz;
         
