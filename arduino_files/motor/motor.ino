@@ -16,10 +16,10 @@ ros::NodeHandle nh;
  *******************************************************************************/
 
 //Pin configurations
-const int LEFT_VELOCITY = 3;
+const int LEFT_VELOCITY = 10;
 const int RIGHT_VELOCITY = 11;
-const int LEFT_DIRECTION = 13;
-const int RIGHT_DIRECTION = 12;
+const int LEFT_DIRECTION = 12;
+const int RIGHT_DIRECTION = 13;
 const int LIGHT = 7;
 
 // Callback for Velocity which gets the left and right wheel velocity and direction
