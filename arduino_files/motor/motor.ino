@@ -26,8 +26,8 @@ const int LIGHT = 7;
 void VelocityCallback(const mst_control::Velocity &msg) {
     analogWrite(LEFT_VELOCITY, msg.left_vel);
     analogWrite(RIGHT_VELOCITY, msg.right_vel);
-    digitalWrite(LEFT_DIRECTION, msg.left_dir);
-    digitalWrite(RIGHT_DIRECTION, !msg.right_dir);
+    digitalWrite(LEFT_DIRECTION, !msg.left_dir);
+    digitalWrite(RIGHT_DIRECTION, msg.right_dir);
 }
 
 //Callback from LIGHT msg, changes mode of the LIGHT
