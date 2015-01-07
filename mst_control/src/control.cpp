@@ -31,15 +31,45 @@ void check_mode(const sensor_msgs::Joy::ConstPtr& joy) {
     }
 }
 
+/*******************************************************************************
+ * @fn check_shift(const sensor_msgs::Joy::ConstPtr& joy)
+ * @brief Check to see if the speed of the robot should be changed
+ * @param joy the message from joy node
+ * @pre A valid joy message has been recieved
+ * @post The robot will either shift up or down, this will increase the speed if
+ *       rb is pressed and will decrease the speed if lb is pressed.
+ ******************************************************************************/
+void check_shift(const sensor_msgs::Joy::ConstPtr& joy) {
+	//Up shift
+	if(check_togg(joy->buttons[joy_r_button], joy_r_button)) {
+		speed_mult += 0.1f;
+
+		//Make sure that speed does not shift higher than 100%
+		if(speed_mult >= 1.0f) {
+			speed_mult = 1.0f;
+		}
+	}
+
+	//Down shift
+	else if(check_togg(joy->buttons[joy_l_button], joy_l_button)) {
+		speed_mult -= 0.1f;
+
+		//Make sure that speed does not shift lower than 10%
+		if(speed_mult <= 0.1f) {
+			speed_mult = 0.1f;
+		}
+	}
+}
+
 void update_velocity(float right_vel, float left_vel) {
 
     mst_control::Velocity velocity;
 
     //Modify the velocity message to send to the motors
-    velocity.right_vel = abs(right_vel) * MOTOR_SPEED_MAX;
+    velocity.right_vel = abs(right_vel) * MOTOR_SPEED_MAX * speed_mult;
     velocity.right_dir = right_vel > 0.0f;
 
-    velocity.left_vel = abs(left_vel) * MOTOR_SPEED_MAX;
+    velocity.left_vel = abs(left_vel) * MOTOR_SPEED_MAX * speed_mult;
     velocity.left_dir = left_vel > 0.0f;
 
     //Publish the message to the motor controller
@@ -81,6 +111,8 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     switch (robot_mode) {
     case arcade_mode:
 
+    	check_shift(joy);
+
         // send the updated velocity to the motor controller
         update_velocity(
             get_right_velocity(joy_leftstick_x, joy_rightstick_y),
@@ -93,6 +125,8 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
         break;
 
     case diff_mode:
+
+    	check_shift(joy);
 
         // send the updated velocity to the motor controller
         update_velocity(joy_rightstick_x, joy_leftstick_x);

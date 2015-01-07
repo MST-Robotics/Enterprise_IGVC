@@ -97,7 +97,9 @@ const uint8_t MOTOR_SPEED_MAX = 100;
     #define  joy_dpad_r     12
     #define  joy_light      8
     #define  joy_l_stick    9
-    #define  joy_r_stick    10static bool check_togg(bool, int);static bool check_togg(bool, int);
+    #define  joy_r_stick    10
+
+    static bool check_togg(bool, int);
     
 //Enumorator for each mode 
 enum Mode
@@ -124,12 +126,13 @@ mst_control::Control_ParamsConfig params;
 *If using a different remote in the future, assign geometry_twist
 *so we have a universal twist for any controller
 *
-*See xbox_callback
+*See joy_callback
 ******************************************************************/
 bool xtogg[30];
 bool robot_init;
 bool done_togg = 0;
 int last_msg_waypoint = 0;
+float speed_mult = 0.1f;	//Speed multiplier for robot, shifts up and down
 
 /***********************************************************
 * Namespace Changes
