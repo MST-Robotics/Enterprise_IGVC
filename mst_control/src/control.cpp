@@ -5,7 +5,10 @@
  * @date 4/3/13
  * @brief controlls which output goes to motors
  ******************************************************************************/
-#include "control.h"
+#include <control.h>
+
+#include <string_constants.h>
+
 
 /*******************************************************************************
  * Message Callbacks
@@ -194,10 +197,10 @@ int main(int argc, char **argv) {
 
     //Find the topic name
     std::string nav;
-    nav = n.resolveName("nav_twist");
+    nav = n.resolveName(TOPIC_NAVIGATION_TWIST);
 
     //Ensure that the twist topic from autonomous is named nav_twist
-    if (nav == "nav_twist") {
+    if (nav == TOPIC_NAVIGATION_TWIST) {
         ROS_WARN("Control: navigation twist has not been remapped! "
                 "Typical command-line usage:\n"
                 "\t$ ./Contestop_pubrol twist:=<twist topic> [transport]");
@@ -205,11 +208,11 @@ int main(int argc, char **argv) {
 
     //Create subscriptions
     nav_sub = n.subscribe(nav, 100, navigation_callback);
-    xbox_state_sub = n.subscribe<sensor_msgs::Joy>("joy", 1, joy_callback);
+    xbox_state_sub = n.subscribe<sensor_msgs::Joy>(TOPIC_JOY, 1, joy_callback);
 
     //Create publishers
-    motor_pub = n.advertise<mst_control::Velocity>("cmd_vel", 1);
-    light_pub = n.advertise<std_msgs::UInt8>("indicator_light", 1);
+    motor_pub = n.advertise<mst_control::Velocity>(TOPIC_VELOCITY, 1);
+    light_pub = n.advertise<std_msgs::UInt8>(TOPIC_INDICATOR_LIGHT, 1);
 
     //Set ros loop rate to 30Hz
     ros::Rate loop_rate(30);

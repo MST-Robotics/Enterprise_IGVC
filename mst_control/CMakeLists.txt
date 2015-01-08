@@ -103,6 +103,7 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
   include
+  ../common
 )
 
 ## Declare a cpp library
