@@ -40,25 +40,25 @@ void check_mode(const sensor_msgs::Joy::ConstPtr& joy) {
  *       rb is pressed and will decrease the speed if lb is pressed.
  ******************************************************************************/
 void check_shift(const sensor_msgs::Joy::ConstPtr& joy) {
-	//Up shift
-	if(check_togg(joy->buttons[joy_r_button], joy_r_button)) {
-		speed_mult += 0.1f;
+    //Up shift
+    if (check_togg(joy->buttons[joy_r_button], joy_r_button)) {
+        speed_mult += 0.1f;
 
-		//Make sure that speed does not shift higher than 100%
-		if(speed_mult >= 1.0f) {
-			speed_mult = 1.0f;
-		}
-	}
+        //Make sure that speed does not shift higher than 100%
+        if (speed_mult >= 1.0f) {
+            speed_mult = 1.0f;
+        }
+    }
 
-	//Down shift
-	else if(check_togg(joy->buttons[joy_l_button], joy_l_button)) {
-		speed_mult -= 0.1f;
+    //Down shift
+    else if (check_togg(joy->buttons[joy_l_button], joy_l_button)) {
+        speed_mult -= 0.1f;
 
-		//Make sure that speed does not shift lower than 10%
-		if(speed_mult <= 0.1f) {
-			speed_mult = 0.1f;
-		}
-	}
+        //Make sure that speed does not shift lower than 10%
+        if (speed_mult <= 0.1f) {
+            speed_mult = 0.1f;
+        }
+    }
 }
 
 void update_velocity(float right_vel, float left_vel) {
@@ -77,14 +77,20 @@ void update_velocity(float right_vel, float left_vel) {
 
 }
 
+float mapminmax(float x, float xmax, float xmin, float ymax, float ymin) {
+    return (ymax - ymin) * (x - xmin) / (xmax - xmin) + ymin;
+}
+
 float get_right_velocity(float linearVelocity, float angularVelocity) {
-    return (2 * linearVelocity + angularVelocity * 2 * ROBOT_WIDTH)
+    float v_right = (2 * linearVelocity + angularVelocity * ROBOT_BASE)
             / (2 * WHEEL_RADIUS);
+    return mapminmax(v_right, ROTATION_MAX, ROTATION_MIN, 1.0f, -1.0f);
 }
 
 float get_left_velocity(float linearVelocity, float angularVelocity) {
-    return (2 * linearVelocity - angularVelocity * 2 * ROBOT_WIDTH)
+    float v_left = (2 * linearVelocity - angularVelocity * ROBOT_BASE)
             / (2 * WHEEL_RADIUS);
+    return mapminmax(v_left, ROTATION_MAX, ROTATION_MIN, 1.0f, -1.0f);
 }
 
 /*******************************************************************************
@@ -111,7 +117,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     switch (robot_mode) {
     case arcade_mode:
 
-    	check_shift(joy);
+        check_shift(joy);
 
         // send the updated velocity to the motor controller
         update_velocity(
@@ -126,7 +132,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
 
     case diff_mode:
 
-    	check_shift(joy);
+        check_shift(joy);
 
         // send the updated velocity to the motor controller
         update_velocity(joy_rightstick_x, joy_leftstick_x);
@@ -154,13 +160,11 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
  ***********************************************************/
 void navigation_callback(const geometry_msgs::Twist twist) {
     if (robot_mode == autonomous) {
-
-        float rightVel = get_right_velocity(twist.linear.x, twist.angular.z);
-        float leftVel = get_left_velocity(twist.linear.x, twist.angular.z);
-
         // send the updated velocity to the motor controller
-        update_velocity(rightVel, leftVel);
-
+        update_velocity(
+            get_right_velocity(twist.linear.x, twist.angular.z),
+            get_left_velocity(twist.linear.x, twist.angular.z)
+        );
     }
 }
 
@@ -255,7 +259,6 @@ bool check_togg(bool button_state, int button_position) {
     return togg;
 }
 
-
 /*******************************************************************************
  * @fn update_light(uint8_t value)
  * @brief Update the light to the specified value and publish a message
@@ -307,11 +310,11 @@ void change_mode(Mode new_mode) {
 void say(std::string say) {
     /*sound_play::SoundRequest sound;
 
-    sound.sound = sound.SAY;
-    sound.command = sound.PLAY_ONCE;
-    sound.arg = say;
+     sound.sound = sound.SAY;
+     sound.command = sound.PLAY_ONCE;
+     sound.arg = say;
 
-    sound_pub.publish(sound);*/
+     sound_pub.publish(sound);*/
 }
 
 /*******************************************************************************

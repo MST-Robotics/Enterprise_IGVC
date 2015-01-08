@@ -59,16 +59,16 @@ ros::Publisher                  light_pub;
 * Constants
 ***********************************************************/
 
-const float ROBOT_WIDTH  = 0.26; //meters
+const float ROBOT_BASE  = 0.52; //meters
 const float WHEEL_RADIUS  = 0.19; //meters
-
-const float ROT_SPEED    = 6.0;
-const float LINEAR_SPEED = 6.0;
 
 const float JOY_TRIGGER_MAX = 1.0f;
 const float JOY_TRIGGER_MIN = -1.0f;
 
 const uint8_t MOTOR_SPEED_MAX = 100;
+
+const float ROTATION_MAX = (1.0f + ROBOT_BASE / 2.0f) / WHEEL_RADIUS;
+const float ROTATION_MIN = -ROTATION_MAX;
 
 /*-----------------------------------
 	Velocity and sensor data variables
