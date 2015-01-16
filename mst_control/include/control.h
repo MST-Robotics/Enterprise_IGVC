@@ -59,13 +59,13 @@ ros::Publisher                  light_pub;
 * Constants
 ***********************************************************/
 
-const float ROBOT_BASE  = 0.52; //meters
+const float ROBOT_BASE  = 0.62; //meters
 const float WHEEL_RADIUS  = 0.19; //meters
 
 const float JOY_TRIGGER_MAX = 1.0f;
 const float JOY_TRIGGER_MIN = -1.0f;
 
-const uint8_t MOTOR_SPEED_MAX = 100;
+const uint8_t MOTOR_SPEED_MAX = 255;
 
 const float ROTATION_MAX = (1.0f + ROBOT_BASE / 2.0f) / WHEEL_RADIUS;
 const float ROTATION_MIN = -ROTATION_MAX;
@@ -132,7 +132,7 @@ bool xtogg[30];
 bool robot_init;
 bool done_togg = 0;
 int last_msg_waypoint = 0;
-float speed_mult = 0.1f;	//Speed multiplier for robot, shifts up and down
+float speed_mult = 0.4f;	//Speed multiplier for robot, shifts up and down
 
 /***********************************************************
 * Namespace Changes
