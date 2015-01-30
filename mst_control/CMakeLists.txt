@@ -10,6 +10,7 @@ find_package(catkin REQUIRED
   message_generation
   sensor_msgs
   nav_msgs
+  sound_play
 )
 
 ## System dependencies are found with CMake's conventions

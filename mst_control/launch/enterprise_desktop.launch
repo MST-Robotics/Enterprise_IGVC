@@ -54,7 +54,7 @@
     <!--node pkg="wiimote" type="wiimote_node.py" name="wiimote_desktop" respawn="true" if="$(arg wiimote)"/-->
     
     <!-- launch soud play for speach syth  -->
-    <!--node pkg="sound_play" type="soundplay_node.py" name="sound_play_desktop" if="$(arg sound)"/-->
+    <node pkg="sound_play" type="soundplay_node.py" name="sound_play" if="$(arg sound)"/>
     
     <!-- launch the dynamic reconfigure gui  -->
     <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" if="$(arg config)" />

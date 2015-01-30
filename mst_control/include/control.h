@@ -19,7 +19,7 @@
 #include <geometry_msgs/Twist.h>
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
-//#include <sound_play/SoundRequest.h>
+#include <sound_play/sound_play.h>
 #include <mst_position/target_heading.h>
 #include "sensor_msgs/Joy.h"
 #include "geometry_msgs/Vector3.h"
@@ -47,8 +47,6 @@ ros::Subscriber                 nav_sub;
 /***********************************************************
 * Publishers
 ***********************************************************/
-
-
 ros::Publisher                  motor_pub;
 ros::Publisher                  sound_pub;
 ros::Publisher                  light_pub;
@@ -58,6 +56,10 @@ ros::Publisher                  light_pub;
 /***********************************************************
 * Constants
 ***********************************************************/
+//Soundplay constants for TTS
+//In order for it to be global it must be used as a pointer and initialized 
+//in main
+boost::shared_ptr<sound_play::SoundClient> sc;
 
 const float ROBOT_BASE  = 0.62; //meters
 const float WHEEL_RADIUS  = 0.19; //meters
@@ -144,8 +146,6 @@ using namespace std;
 * Function prototypes
 ***********************************************************/
 void change_mode(Mode new_mode);
-void say(std::string );
-void play(std::string );
 void stop_robot();
 bool check_togg(bool, int);
     

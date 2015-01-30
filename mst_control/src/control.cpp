@@ -189,6 +189,9 @@ void setparamsCallback(mst_control::Control_ParamsConfig &config, uint32_t level
 int main(int argc, char **argv) {
     ros::init(argc, argv, "Control");
     ros::NodeHandle n;
+    
+    //Setup sound client for TTS
+    sc.reset(new sound_play::SoundClient());
 
     //Setup initial robot state variables
     robot_init = true;
@@ -224,8 +227,7 @@ int main(int argc, char **argv) {
 
         if (robot_init) {
             //First time initialization
-            say("Hello World. My name is S and T Enterprise. "
-                    "Please press the EX box button to connect");
+            sc->say("Hello World. My name is S and T Enterprise.");
             robot_init = false;
         }
 
@@ -286,38 +288,25 @@ void change_mode(Mode new_mode) {
     switch (robot_mode) {
     case standby:
         ROS_INFO("Control: Standby Mode");
+        sc->say("Entering Standby");
         update_light(0);
         break;
     case autonomous:
         ROS_INFO("Control: Autonomous Mode");
+        sc->say("Entering Autonomous mode.");
         update_light(1);
         break;
     case arcade_mode:
         ROS_INFO("Control: Manual Xbox Arcade Drive Mode");
+        sc->say("Entering arcade drive manual control");
         update_light(0);
         break;
     case diff_mode:
         ROS_INFO("Control: Manual Xbox Differential Drive Mode");
+        sc->say("Entering tank drive manual control");
         update_light(0);
         break;
     }
-}
-
-/*******************************************************************************
- * @fn say(std::string say)
- * @brief This will have the robot use its speakers to say the string with TTS
- * @pre sound_play is running
- * @post The robot plays the text through the speakers
- * @param std::string say The string that should be read aloud using TTS
- *******************************************************************************/
-void say(std::string say) {
-    /*sound_play::SoundRequest sound;
-
-     sound.sound = sound.SAY;
-     sound.command = sound.PLAY_ONCE;
-     sound.arg = say;
-
-     sound_pub.publish(sound);*/
 }
 
 /*******************************************************************************
