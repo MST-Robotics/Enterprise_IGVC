@@ -6,6 +6,11 @@
  * @brief publishes transform tree using gps and headings taken in from garmin
  * and provides a service to transform gps coardinates into the world
  * frame
+ * @todo change degree to radian conversion to a constant variables and create a
+ * function for the conversion, use a point 2d object to represent lat long 
+ * variables
+ * need to also do comments for complicated functions (like find heading)
+ * fill out description for Odometry
  ******************************************************************************/
 
 /***********************************************************
@@ -119,35 +124,34 @@ using namespace std;
  ***********************************************************/
 
 /***********************************************************
- * @fn edgesCallback(const sensor_msgs::ImageConstPtr& msg)
- * @brief adds the edges image to map using a weight
- * @pre takes in a ros message of a raw or cv image
- * @post image added to the map
- * @param takes in a ros message of a raw or cv image
+ * @fn imuCallback(const geometry_msgs::Quaternion::ConstPtr
+ * & imu)
+ * @brief gets the position information from the imu 
+ * (magnatometer), sets the current_head = heading 
+ * observed by the magnatometer.
+ * @pre imu publishing Quaternion
+ * @post current_head = robot's heading
+ * @param takes in a imu publishing Quaternion
  ***********************************************************/
 void imuCallback(const geometry_msgs::Quaternion::ConstPtr& imu) {
-    //Compute average
     current_head = atan2(imu->y, imu->x);
-
-    cout << current_head * 180 / (M_PI) << endl;
 }
 
 /***********************************************************
- * @fn edgesCallback(const sensor_msgs::ImageConstPtr& msg)
- * @brief adds the edges image to map using a weight
- * @pre takes in a ros message of a raw or cv image
- * @post image added to the map
- * @param takes in a ros message of a raw or cv image
+ * @fn gpsCallback(const sensor_msgs::NavSatFix::ConstPtr& 
+ * fix)
+ * @brief setting the current longitude and latitude from the 
+ * GPS data
+ * @pre takes a GPS fix message 
+ * @post current_lon and current_lat updated
+ * @param takes a GPS fix message
  ***********************************************************/
 void gpsCallback(const sensor_msgs::NavSatFix::ConstPtr& fix) {
-    ROS_INFO("Position: gps message received");
     if (params.use_gpsd && !params.use_dummy) {
         current_lon = fix->longitude;
         current_lat = fix->latitude;
-        std::cout << "Current Latitude: " << current_lon << std::endl;
-        std::cout << "Current Longitude: " << current_lat << std::endl;
     }
-
+    
 }
 
 /***********************************************************
@@ -303,8 +307,6 @@ void reset_waypoints() {
 double find_dist(double lat1, double lon1, double lat2, double lon2) {
     // find distance using haversine formula
 
-    // magic forumala we have no idea how it works, if it works, or why it works.
-
     double R = 6371000;
     double delta_lat = lat2 - lat1;
     double delta_lon = lon2 - lon1;
@@ -327,17 +329,13 @@ double find_heading(double lat1, double lon1, double lat2, double lon2) {
     double delta_lon = lon2 - lon1;
     double heading;
 
-    // magic forumla #2 we have no idea how it works, if it works or why it works
-
     //find the bearing
     double x = sin(delta_lon) * cos(lat2);
-
     double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat1) * cos(delta_lon);
+    
     double bearing = atan2(x, y);
 
     heading = -bearing + ( pi / 2);
-
-    //ROS_INFO("Heading : %f", heading);
 
     return heading;
 
@@ -345,8 +343,8 @@ double find_heading(double lat1, double lon1, double lat2, double lon2) {
 
 /***********************************************************
  * @fn read_waypoints()
- * @brief reads gps waypoinds from dynamic reconfigure
- * @pre has to have global arrays to place params in
+ * @brief reads gps waypoints from dynamic reconfigure
+ * @pre global array way must be of size 10
  * @todo this should be replaced with reading a file
  ***********************************************************/
 void read_waypoints() {
@@ -412,24 +410,44 @@ void read_waypoints() {
 
 }
 
+/***********************************************************
+ * @fn find_target()
+ * @brief finds the closest waypoint to our position
+ * @pre way (waypoint array) must be of size 10
+ * @post returns an index that corrisponds to the closest waypoint
+ * @todo might look into removing the need for a precondition 
+ * for array size
+ ***********************************************************/
 int find_target() {
 
+    //intitial used to keep track if the closest target and
+    //lowest distance have changed, if they haven't they
+    //stay -1
     double lowest_dist = -1;
     int closest_target = -1;
+    
+    //while closest target is not a valid target and proirty is valid, check 
+    //to find the closest target.
     while (closest_target == -1
-            && ((current_priority <= 10 && !params.reverse_order)
-                    || (current_priority >= 1 && params.reverse_order))) {
+          && ((current_priority <= 10 && !params.reverse_order) 
+	  || (current_priority >= 1 && params.reverse_order))) 
+    {
+      
         for (int i = 0; i < 10; i++) {
+	    //statement shows we found a closest target canidate
             if (!way[i].complete && way[i].priority != 0
-                    && (((way[i].priority <= current_priority)
-                            && !params.reverse_order)
-                            || ((way[i].priority >= current_priority)
-                                    && params.reverse_order))) {
+                && (((way[i].priority <= current_priority)
+                && !params.reverse_order)
+		|| ((way[i].priority >= current_priority)
+                && params.reverse_order))) 
+	    {
+	      
                 double lat = way[i].lat / 180 * pi;
                 double lon = way[i].lng / 180 * pi;
-                ROS_INFO("Lat: %f Lon: %f", lat, lon);
+
                 double dist = find_dist(current_lat, current_lon, lat, lon);
 
+		//we then check to see if it is closer than the last canidate
                 if (dist <= lowest_dist || lowest_dist == -1) {
                     lowest_dist = dist;
                     closest_target = i;
@@ -437,6 +455,8 @@ int find_target() {
 
             }
         }
+        //if closest target still not found modify the priority accordingly to 
+        //allow next itteration in the while loop
         if (closest_target == -1) {
             if (params.reverse_order) {
                 current_priority--;
@@ -450,13 +470,22 @@ int find_target() {
 
 }
 
+
+/***********************************************************
+ * @fn mst_position::target_heading compute_msg(int target)
+ * @brief creates a new heading ros message and initializes 
+ * the variables to the current information with respect to 
+ * the current target and heading.
+ * @pre target is within the size of way array [0 to 9]
+ * @post heading with all variables initialized is returned
+ ***********************************************************/
 mst_position::target_heading compute_msg(int target) {
     mst_position::target_heading heading;
     double lat = way[target].lat / 180 * pi;
     double lon = way[target].lng / 180 * pi;
 
     heading.target_heading = current_head
-            - find_heading(current_lat, current_lon, lat, lon);
+		  - find_heading(current_lat, current_lon, lat, lon);
     heading.distance = find_dist(current_lat, current_lon, lat, lon);
     heading.waypoint = target;
     heading.done = false;
@@ -465,6 +494,12 @@ mst_position::target_heading compute_msg(int target) {
     return heading;
 }
 
+/***********************************************************
+ * @fn nav_msgs::Odometry odom_msg()
+ * @brief 
+ * @pre 
+ * @post 
+ ***********************************************************/
 // Programmer: Jason Gassel  Date: 3-5-12
 // Descr: Generates Odometry message
 nav_msgs::Odometry odom_msg() {
@@ -511,6 +546,13 @@ nav_msgs::Odometry odom_msg() {
     return odom;
 }
 
+
+/***********************************************************
+ * @fn odom_set_origin()
+ * @brief 
+ * @pre 
+ * @post 
+ ***********************************************************/
 void odom_set_origin() {
     inital_lat = current_lat;
     inital_lon = current_lon;
@@ -519,15 +561,28 @@ void odom_set_origin() {
     return;
 }
 
+/***********************************************************
+ * @fn geometry_msgs::PoseStamped relative_waypoint(int target)
+ * @brief sets the timestamp, frame_id, and the pose.position 
+ * variables of the PoseStamped message (a default ros message)
+ * @pre target is within the size of way array [0 to 9]
+ * @post returns a waypoint with out id initialized or 
+ * pos.orientation initialized for waypoint.
+ ***********************************************************/
 geometry_msgs::PoseStamped relative_waypoint(int target) {
     geometry_msgs::PoseStamped waypoint;
+    //header is metadata, needs time stamp (current_time) and
+    //a label (goal)
     waypoint.header.stamp = current_time;
     waypoint.header.frame_id = "goal";
 
+    //distance and angle calculations in order to get x,y,z components 
+    //for pose.position
     double dist = find_dist(current_lat, current_lon, way[target].lat,
             way[target].lng);
     double theta = find_heading(current_lat, current_lon, way[target].lat,
             way[target].lng);
+    
     waypoint.pose.position.x = cos(theta) * dist;
     waypoint.pose.position.y = sin(theta) * dist;
     waypoint.pose.position.z = 0;
