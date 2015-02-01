@@ -1,0 +1,96 @@
+<robot
+  name="Enterprise2">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.00290116420774065 0.0433757838197974 0.171677136873843"
+        rpy="0 0 0" />
+      <mass
+        value="519.878713579077" />
+      <inertia
+        ixx="83.1699805194045"
+        ixy="8.50291213127822"
+        ixz="0.87629234599188"
+        iyy="55.2322608360111"
+        iyz="-0.388567691205053"
+        izz="103.789271563977" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://mst_control/urdf/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://mst_control/urdf/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="Camera">
+    <inertial>
+      <origin
+        xyz="-1.17081790270042E-15 -3.56686522134941E-05 0.0104399684105121"
+        rpy="0 0 0" />
+      <mass
+        value="0.019869688853429" />
+      <inertia
+        ixx="1.7830597271236E-06"
+        ixy="9.41612436036192E-22"
+        ixz="-2.04225603299965E-22"
+        iyy="3.030215810549E-06"
+        iyz="6.48461006234025E-10"
+        izz="3.28236130645933E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://enterprise_description/meshes/Camera.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.6 0.6 0.6 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://mst_control/urdf/meshes/Camera.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Camera"
+    type="fixed">
+    <origin
+      xyz="0.26987 0 0.95193"
+      rpy="1.5708 6.123E-17 1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="Camera" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>
