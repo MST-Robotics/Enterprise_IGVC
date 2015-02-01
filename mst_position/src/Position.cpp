@@ -99,6 +99,7 @@ mst_position::Position_ParamsConfig    params;
  * Function prototypes
  ***********************************************************/
 //void send_target(bool);
+double toRads(double degrees);
 void reset_waypoints();
 void read_waypoints();
 double find_dist(double, double, double, double);
@@ -118,7 +119,8 @@ using namespace std;
  ***********************************************************/
 
 #define pi M_PI
-
+//ratio for conversion to radians
+const double rc = (pi/180);
 /***********************************************************
  * Message Callbacks
  ***********************************************************/
@@ -201,7 +203,18 @@ void setparamsCallback(mst_position::Position_ParamsConfig &config,
 /***********************************************************
  * Private Functions
  ***********************************************************/
-/*
+/***********************************************************
+ * @fn toRads(double degrees){
+ * @brief converts to radians from degrees
+ * @pre degrees is in degrees
+ * @post returns the parameters converted to radians
+ ***********************************************************/
+ double toRads(double degrees){ 
+   degrees *= rc; 
+   
+   return degrees;
+   
+ }
  /***********************************************************
  * @fn send_target(bool skip)
  * @brief finds the best target to go to
@@ -241,8 +254,8 @@ void send_target(bool skip) {
 
             // find distance using haversine formula
             int index = potential_waypoints[j];
-            double lat = way[index].lat / 180 * pi;
-            double lon = way[index].lng / 180 * pi;
+            double lat = toRads(way[index].lat);
+            double lon = toRads(way[index].lng);
             //earths radius times c
             double dist = find_dist(current_lat, current_lon, chosen_lat,
                     chosen_lon);
@@ -456,8 +469,8 @@ int find_target() {
                 && params.reverse_order))) 
 	    {
 	      
-                double lat = way[i].lat / 180 * pi;
-                double lon = way[i].lng / 180 * pi;
+                double lat = toRads(way[i].lat);
+                double lon = toRads(way[i].lng);
 
                 double dist = find_dist(current_lat, current_lon, lat, lon);
 
@@ -495,8 +508,8 @@ int find_target() {
  ***********************************************************/
 mst_position::target_heading compute_msg(int target) {
     mst_position::target_heading heading;
-    double lat = way[target].lat / 180 * pi;
-    double lon = way[target].lng / 180 * pi;
+    double lat = toRads(way[target].lat);
+    double lon = toRads(way[target].lng);
 
     //trying to find how much the robot would need to turn
     //in order to turn in the direction of the given target
