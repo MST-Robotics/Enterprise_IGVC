@@ -302,11 +302,16 @@ void reset_waypoints() {
  * @fn double find_dist(double lat1, double lon1 , double lat2 ,double lon2)
  * @brief computes distace between two gps points
  * @pre takes in lat and lon for two points
- * @post returns a double with the distace in meeters between points
+ * @post returns a double with the distace in meters between points
  ***********************************************************/
 double find_dist(double lat1, double lon1, double lat2, double lon2) {
-    // find distance using haversine formula
-
+    // find distance using haversine formula, equation from:
+    // www.movable-type.co.uk/scripts/latlong.htm
+    // a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
+    // c = 2 ⋅ atan2( √a, √(1−a) )
+    // d = R ⋅ c 
+  
+    // radius of the earth in meters
     double R = 6371000;
     double delta_lat = lat2 - lat1;
     double delta_lon = lon2 - lon1;
@@ -314,28 +319,37 @@ double find_dist(double lat1, double lon1, double lat2, double lon2) {
             + cos(lat1) * cos(lat2) * sin(delta_lon / 2) * sin(delta_lon / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
 
-    //earths radius times c
+    // earths radius times c
     return R * c;
 }
 
 /***********************************************************
- * @fn double find_heading(double lat1, double lon1 , double lat2 ,double lon2)
+ * @fn double find_heading(double lat1, double lon1, double lat2 ,double lon2)
  * @brief computes heading between two gps points
- * @pre takes in lat and lon for two points
- * @post returns a double with the heading in radians
+ * @pre takes in latitude and longitude for two points
+ * @post returns a double with the heading in radians from radian = 0
  ***********************************************************/
 double find_heading(double lat1, double lon1, double lat2, double lon2) {
-    // find bearing between two gps points
+    // bearing is the change needed to head in the direction of interest
+    // from a current heading.
+    // heading is the current direction heading, though the heading returned
+    // might simply be the bearing depending on the input
+
     double delta_lon = lon2 - lon1;
     double heading;
 
-    //find the bearing
+    //find the bearing using the equation, the angle between north and the line
+    //from lat1, lon1 to lat2, lon2:
+    //θ = atan2( sin Δλ ⋅ cos φ2 , cos φ1 ⋅ sin φ2 − sin φ1 ⋅ cos φ2 ⋅ cos Δλ )
+    //equation from www.movable-type.co.uk/scripts/latlong.html
     double x = sin(delta_lon) * cos(lat2);
     double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat1) * cos(delta_lon);
-    
     double bearing = atan2(x, y);
 
-    heading = -bearing + ( pi / 2);
+    //subtracting from pi/2 because pi/2 is "north" in our case
+    //so what we end up with is an angle with respect to 0 radians
+    //giving a "heading" in direction to lat2 and lon2
+    heading = ( pi / 2) - bearing;
 
     return heading;
 
@@ -484,6 +498,9 @@ mst_position::target_heading compute_msg(int target) {
     double lat = way[target].lat / 180 * pi;
     double lon = way[target].lng / 180 * pi;
 
+    //trying to find how much the robot would need to turn
+    //in order to turn in the direction of the given target
+    //waypoint
     heading.target_heading = current_head
 		  - find_heading(current_lat, current_lon, lat, lon);
     heading.distance = find_dist(current_lat, current_lon, lat, lon);
