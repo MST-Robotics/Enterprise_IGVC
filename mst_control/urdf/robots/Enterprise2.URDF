@@ -27,7 +27,7 @@
       <material
         name="">
         <color
-          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+          rgba="0 1.0 0 1" />
       </material>
     </visual>
     <collision>
@@ -93,4 +93,47 @@
     <axis
       xyz="0 0 0" />
   </joint>
+  
+  <link
+    name="lidar_link">
+    <inertial>
+      <origin
+        xyz=".5 1 1"
+        rpy="0 0 0" />
+      <mass
+        value="1" />
+      <inertia ixx="1" ixy="0" ixz="0" iyy="0" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+      <origin
+        xyz=".1 0 .285"
+        rpy="0 0 0" />
+      <geometry>
+        <box size=".1 .1 .1"/>
+      </geometry>
+      <material
+        name="Cyan">
+        <color
+          rgba="0 1 1 1" />
+      </material>
+    </visual>
+    <geometry>
+      <box size=".1 .1 .1"/>
+    </geometry>
+  </link>
+  
+  <joint
+    name="lidar_link"
+    type="fixed">
+    <origin
+      xyz=".1 0 .285"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="lidar_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  
 </robot>
