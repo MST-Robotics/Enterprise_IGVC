@@ -224,7 +224,7 @@ void targetCallback( const mst_position::target_heading::ConstPtr& msg)
 * @post changes the parameters on potnav to those from the 
 * parameter server
 ***********************************************************/
-void setparamsCallback(mst_navigation::Pot_Nav_ParamsConfig &config, /*uint32_t level //spooky*/)
+void setparamsCallback(mst_navigation::Pot_Nav_ParamsConfig &config, uint32_t level)
 {
   // set params
   params = config;
