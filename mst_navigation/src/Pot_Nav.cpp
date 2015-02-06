@@ -52,7 +52,7 @@ cv::Mat                         stat;
 cv::Mat                         edges;
 
 /*
-std::queue<cv::Mat>             stat_q;
+
 std::queue<cv::Mat>             edges_q;
 */
 
@@ -70,10 +70,13 @@ image_transport::Publisher      map_pub;
 
 mst_position::target_heading    target;
 
+//makes sure that if the map isn't changed initially, functions past 
+//stat callback don't try to do anything with invalid data
 bool                            map_changed = 0;
-std::queue<ros::Time>                       edges_time_q ;
-std::queue<ros::Time>                       stat_time_q ;
+std::queue<ros::Time>           edges_time_q ;
+std::queue<ros::Time>           stat_time_q ;
 
+//
 bool                            first_callback = 1;
 
 mst_navigation::Pot_Nav_ParamsConfig params;
@@ -151,12 +154,16 @@ void edgesCallback( const sensor_msgs::ImageConstPtr& msg)
 ***********************************************************/
 void statCallback( const sensor_msgs::ImageConstPtr& msg)
 {
+	//why do we need cv_bridge?  cv_bridge is the bridge
+	//between OpenCV images and ROS images (we need to
+	//convert from one another). 
 	cv_bridge::CvImagePtr cv_ptr_src;
-	std::vector<cv::Mat> Chanels;
+	std::vector<cv::Mat> Channels;
 	
 	//takes in the image
 	try
 	{
+		//taking the ROS msg image and making it a cv image
 		cv_ptr_src = cv_bridge::toCvCopy(msg, "rgb8");
 	}
 	catch (cv_bridge::Exception& e)
@@ -168,33 +175,37 @@ void statCallback( const sensor_msgs::ImageConstPtr& msg)
 	if(first_callback)
 	{
 		//initalize map
+		//CV_32FC1 is a 32 bit floating point signed depth in one channel
+		//image
 		map.image = cv::Mat::zeros(cv_ptr_src->image.size(),CV_32FC1);
 		map.encoding = "32FC1";
 		
 		first_callback = 0;
 	}
+	
+	//splitting the channels from cv_ptr_src to Channels (turns into 3 channels)
+	cv::split(cv_ptr_src->image, Channels);
+        
+	//taking the green component of the vector of matricies that represent
+	//channels, 1 corrisponds to green since opencv uses BGR color format, 
+	//not rbg.
+	Channels[1].convertTo(Channels[1], CV_32FC1);
 
-	cv::split(cv_ptr_src->image , Chanels);
-    
-	Chanels[1].convertTo(Chanels[1],CV_32FC1);
-    
-	/*
-	stat_q.push( Chanels[1] * params.stat_per/100) ;
-	stat_time_q.push( cv_ptr_src->header.stamp) ;
-	*/
+	//dampens the value of every element in green channel
+	//by the percentage given by stat_per(centage)
+	stat = Channels[1] * params.stat_per/100;
 	
-	stat = Chanels[1] * params.stat_per/100;
-	
+	//takes the metadata from the image processed from the
+	//origional ROS ImageConstPtr& msg Image
 	map.header = cv_ptr_src->header;
 
-    //adds them together using weighted percentage
 
 	map_changed = 1;
 }
 
 /***********************************************************
 * @fn targetCallback( const MST_Position::Target_Heading::ConstPtr& msg)
-* @brief copies target message to global variable
+* @brief copies position data for target to target in Pot_Nav
 ***********************************************************/
 void targetCallback( const mst_position::target_heading::ConstPtr& msg)
 {
@@ -210,9 +221,10 @@ void targetCallback( const mst_position::target_heading::ConstPtr& msg)
 * @fn setparamsCallback(const sensor_msgs::ImageConstPtr& msg)
 * @brief callback for the reconfigure gui
 * @pre has to have the setup for the reconfigure gui
-* @post changes the parameters
+* @post changes the parameters on potnav to those from the 
+* parameter server
 ***********************************************************/
-void setparamsCallback(mst_navigation::Pot_Nav_ParamsConfig &config, uint32_t level)
+void setparamsCallback(mst_navigation::Pot_Nav_ParamsConfig &config, /*uint32_t level //spooky*/)
 {
   // set params
   params = config;
@@ -224,14 +236,17 @@ void setparamsCallback(mst_navigation::Pot_Nav_ParamsConfig &config, uint32_t le
 
 /***********************************************************
 * @fn find_twist()
-* @brief computes the twists using the map
+* @brief computes the twists (angular and linear velocities) 
+* using the map
 * @pre needs a globally defined map it uses to compute twist
 * @post computes the twist
 * @return returns the geometry messages standard twist and
-* 		  draws debug info on map_dis
+* draws debug info on map_dis 
 ***********************************************************/
 geometry_msgs::Twist find_twist()
 {
+	//Point2i is a typedef of Point (which has an two
+	//dimensions, x and y) that is of type integer
 	cv::Point2i robot_center;
 	geometry_msgs::Twist twist;
 	cv::Point2i box_1;
@@ -273,14 +288,18 @@ geometry_msgs::Twist find_twist()
 	//add  in target
 	//ignoring y for now
 	/*twist.linear.x += (params.target_weight_y/100.0) * sin(target.target_heading) / (target.distance * params.target_dist_scale/1000) ;*/
-
+	
+	//sign to determine angular twist added to z based on what direction the robot is facing (in radians)
 	int sign = 1;
 	if (cos(target.target_heading) < 0)
 	{
 		sign = -1;
 	}
-
-	twist.angular.z += (params.target_weight_z/100.0) * ((twist.linear.x * params.target_y_scale) +1) * pow(fabs(cos(target.target_heading)), params.target_x_exp) * sign / ((target.distance * params.target_dist_scale/1000) + 1) ;
+	
+	//
+	twist.angular.z += (params.target_weight_z/100.0) * ((twist.linear.x * params.target_y_scale) +1) *
+			    pow(fabs(cos(target.target_heading)), params.target_x_exp) * 
+			    sign / ((target.distance * params.target_dist_scale/1000) + 1);
 
 	ROS_INFO("y: %f x: %f twist: %f ", sin(target.target_heading) , cos(target.target_heading), twist.angular.z );
 

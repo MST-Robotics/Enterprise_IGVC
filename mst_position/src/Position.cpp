@@ -532,6 +532,8 @@ mst_position::target_heading compute_msg(int target) {
  ***********************************************************/
 // Programmer: Jason Gassel  Date: 3-5-12
 // Descr: Generates Odometry message
+// http://wiki.ros.org/navigation/Tutorials/RobotSetup/Odom this 
+// might have the rosetta stone of this code!
 nav_msgs::Odometry odom_msg() {
     nav_msgs::Odometry odom;
     odom.header.stamp = current_time;
