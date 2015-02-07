@@ -104,11 +104,13 @@
 
     </group>
     
-    <node pkg="rosserial_python" type="serial_node.py" name="arduino_node" args="/dev/ttyACM0" />  
+    <node pkg="rosserial_python" type="serial_node.py" name="arduino_node" args="/dev/ttyUSB0" />  
     
     <node pkg="nmea_navsat_driver" type="nmea_serial_driver" name="gps_node" /> 
     
     <param name="robot_description" textfile="$(find mst_control)/urdf/robots/Enterprise2.URDF" />
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
+    
+    <node pkg="enterprise_description" type="enterprise_description_node" name="tf_broadcast" />
 </launch>
 
