@@ -21,7 +21,7 @@
     <env name="ROS_MASTER_URI" value="http://$(arg robot_addr):11311" />
     
     <!-- launch rviz if requested -->
-    <node name="rviz_desktop" pkg="rviz" type="rviz" args="-d $(find mst_control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
+    <node name="rviz_desktop" pkg="rqt_rviz" type="rqt_rviz" args="-d $(find mst_control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
     
     <!-- launch joy package-->
     <node pkg="joy" type="joy_node" name="joy_node" respawn="true">
@@ -112,5 +112,9 @@
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
     
     <node pkg="enterprise_description" type="enterprise_description_node" name="tf_broadcast" />
+    
+    <node pkg="urg_node" type="urg_node" name="lidar" />
+    
+    <node pkg="gmapping" type="slam_gmapping" name="gmapping" />
 </launch>
 

@@ -464,7 +464,7 @@ int main(int argc, char **argv)
 
 	//Create publishers
 	twist_pub = n.advertise<geometry_msgs::Twist>( "nav_twist" , 5 );
-	map_pub = it.advertise( "map" , 5 );
+	map_pub = it.advertise( "map_image" , 5 );
     
 	//set rate to 30Hz
 	ros::Rate loop_rate(60);

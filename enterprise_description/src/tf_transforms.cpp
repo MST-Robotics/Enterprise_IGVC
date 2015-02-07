@@ -59,7 +59,7 @@ int main(int argc, char** argv)
         joint_state.position.resize(3);
         joint_state.name[0] ="Camera";
         joint_state.position[0] = 0;
-        joint_state.name[1] ="lidar_link";
+        joint_state.name[1] ="laser";
         joint_state.position[1] = 0;
 
         // update transform
