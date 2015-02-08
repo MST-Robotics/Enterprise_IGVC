@@ -508,14 +508,9 @@ int main(int argc, char **argv)
 			//Check if the robot has reached the last waypoint
 			if(target.stop_robot)
 			{
-				//twist = find_twist();
 				twist = stop_robot();
 			}
-			//else
-			//{
-			//
-			//	twist = find_twist();
-			//}
+
 			
 			//publish twist
 			twist_pub.publish(twist);
