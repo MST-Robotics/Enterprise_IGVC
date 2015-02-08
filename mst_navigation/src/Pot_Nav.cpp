@@ -43,12 +43,17 @@ namespace enc = sensor_msgs::image_encodings;
 /***********************************************************
 * Global variables
 ***********************************************************/
-
+//computational map, the one we take information from and 
+//perform calculations on
 cv_bridge::CvImage              map;
+
+//map which is displayed, the map we draw debuginging
+//information on
 cv_bridge::CvImage              map_dis;
 
-
+//holds green information to be then added to map
 cv::Mat                         stat;
+//not used at this point
 cv::Mat                         edges;
 
 /*
@@ -276,7 +281,7 @@ geometry_msgs::Twist find_twist()
 	//draw the search radius
 	cv::circle(map_dis.image, robot_center, params.search_radius, 255);
 
-	//initialize twist and apply forward foring function
+	//initialize twist and apply forward forcing function
 	twist.linear.y = 0;
 	twist.linear.x = params.carrot_on_a_stick;
 	twist.linear.z = 0;
@@ -296,7 +301,7 @@ geometry_msgs::Twist find_twist()
 		sign = -1;
 	}
 	
-	//
+	//adding one to avoid dividing by zero in some cases
 	twist.angular.z += (params.target_weight_z/100.0) * ((twist.linear.x * params.target_y_scale) +1) *
 			    pow(fabs(cos(target.target_heading)), params.target_x_exp) * 
 			    sign / ((target.distance * params.target_dist_scale/1000) + 1);
@@ -305,9 +310,10 @@ geometry_msgs::Twist find_twist()
 
 	//compute twist
 	//Iterate over every ray on the map image
-	for(int deg = 0 ;  deg <= params.search_res ; deg++ )
+	for(int deg = 0;  deg <= params.search_res ; deg++ )
 	{
 		float degree = deg;
+		//radian resolution = res
 		float res = params.search_res;
 		float theta = pi*(degree/res);
 		cv::Point2f search_edge;
@@ -341,7 +347,7 @@ geometry_msgs::Twist find_twist()
 				the iterator since it should return a pointer
 				but I give up for now
 				*/
-				
+				//drawing the white lines on the screen where the raytraces happen
 				if(params.display_rays)
 				{
 					map_dis.image.at<float>( ray.pos().y , ray.pos().x ) = 200; 
@@ -349,6 +355,7 @@ geometry_msgs::Twist find_twist()
 				
 				//magnitude divided by the distance squared
 				double dist = (params.dist_scale_x/1000 * pow(abs(ray.pos().x - robot_center.x ),2) +  params.dist_scale_y/1000 * pow(abs(ray.pos().y -robot_center.y ),2));
+				//if the color is detected or not
 				float mag = map.image.at<float>( ray.pos().y , ray.pos().x );
 				
 				//Slow down based on the distance to an object
@@ -363,6 +370,7 @@ geometry_msgs::Twist find_twist()
 		}	
 	}
 
+	/* DRAWING THE COMPASS LINE ON THE DISPLAY IMAGE */
 	cv::Point2i line;
 
 	line.x = robot_center.x - params.compas_length * twist.angular.z;
@@ -377,7 +385,7 @@ geometry_msgs::Twist find_twist()
 	
 	//Draw the destination line on the map
 	cv::line(map_dis.image, robot_center,line,255 , 3);   
-
+	/* END OF DRAWING THE COMPASS LINE ON THE DISPLAY IMAGE */
 	return twist;
 }
 
@@ -490,11 +498,15 @@ int main(int argc, char **argv)
 			edges_q.pop();
 			*/
 			
+			//why are we multiplying a zero matrix by something? makes no sense
+			//we are adding the stat (which contains the green value) to the 
+			//map.image (which is just black at this point)
 			map.image = map.image * params.previous_per/100 + stat;
 			
 			//Check if the robot has reached the last waypoint
 			if(target.stop_robot)
 			{
+				//why do we need to do find twist if the robot is stopping?
 				twist = find_twist(); 
 				twist = stop_robot();
 			}
