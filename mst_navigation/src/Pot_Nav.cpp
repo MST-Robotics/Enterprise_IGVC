@@ -498,23 +498,24 @@ int main(int argc, char **argv)
 			edges_q.pop();
 			*/
 			
-			//why are we multiplying a zero matrix by something? makes no sense
 			//we are adding the stat (which contains the green value) to the 
-			//map.image (which is just black at this point)
+			//map.image
 			map.image = map.image * params.previous_per/100 + stat;
 			
+			//Find optimal direction to next target
+			twist = find_twist();
+
 			//Check if the robot has reached the last waypoint
 			if(target.stop_robot)
 			{
-				//why do we need to do find twist if the robot is stopping?
-				twist = find_twist(); 
+				//twist = find_twist();
 				twist = stop_robot();
 			}
-			else
-			{
-				//Find optimal direction to next target
-				twist = find_twist(); 
-			}
+			//else
+			//{
+			//
+			//	twist = find_twist();
+			//}
 			
 			//publish twist
 			twist_pub.publish(twist);
