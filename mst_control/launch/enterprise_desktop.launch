@@ -20,9 +20,6 @@
     <!-- conect to the specified master  -->
     <env name="ROS_MASTER_URI" value="http://$(arg robot_addr):11311" />
     
-    <!-- launch rviz if requested -->
-    <node name="rviz_desktop" pkg="rqt_rviz" type="rqt_rviz" args="-d $(find mst_control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
-    
     <!-- launch joy package-->
     <node pkg="joy" type="joy_node" name="joy_node" respawn="true">
         <param name="deadzone" value=".1"/>
@@ -73,6 +70,8 @@
       <rosparam file="$(find mst_control)/yaml/Practice_Waypoints.yaml" command="load" />
         
     </node>
+
+    <!--node pkg="mst_pointcloud" type="mst_pointcloud" name="mst_pointcloud"/-->
     
     <node pkg="mst_navigation" type="mst_navigation" name="mst_navigation" >
     
@@ -104,7 +103,7 @@
 
     </group>
     
-    <node pkg="rosserial_python" type="serial_node.py" name="arduino_node" args="/dev/ttyUSB0" />  
+    <node pkg="rosserial_python" type="serial_node.py" name="arduino_node" args="/dev/ttyACM1" />  
     
     <node pkg="nmea_navsat_driver" type="nmea_serial_driver" name="gps_node" /> 
     
@@ -113,8 +112,18 @@
     
     <node pkg="enterprise_description" type="enterprise_description_node" name="tf_broadcast" />
     
-    <node pkg="urg_node" type="urg_node" name="lidar" />
+    <node pkg="urg_node" type="urg_node" name="lidar" >
+    	<param name="serial_port" type="string" value="/dev/ttyACM0"/>
+   	</node>
     
-    <node pkg="gmapping" type="slam_gmapping" name="gmapping" />
+    <node pkg="gmapping" type="slam_gmapping" name="gmapping" >
+    	<param name="map_update_interval" type="double" value="1.0" />
+    </node>
+    
+
+    
+    <!-- launch rviz if requested -->
+    <node name="rviz_desktop" pkg="rqt_rviz" type="rqt_rviz" args="-d $(find mst_control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
+    
 </launch>
 
