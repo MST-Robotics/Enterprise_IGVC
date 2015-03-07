@@ -56,7 +56,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES mst_colorstat
-  CATKIN_DEPENDS cv_bridge image_transport vision_opencv roscpp sensor_msgs std_msgs
+  CATKIN_DEPENDS cv_bridge dynamic_reconfigure image_transport vision_opencv roscpp sensor_msgs std_msgs
   DEPENDS system_lib
 )
 
@@ -86,7 +86,7 @@ add_executable(ColorStat src/ColorStat.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(ColorStat mst_colorstat_generate_messages_cpp)
+add_dependencies(ColorStat mst_colorstat_generate_messages_cpp mst_colorstat_gencfg)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(ColorStat
