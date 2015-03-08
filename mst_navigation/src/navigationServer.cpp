@@ -8,6 +8,16 @@
 
 geometry_msgs::PoseStamped goal_pose;
 
+/*
+ * @fn target_callback(geometry_msgs::PoseStamped pose)
+ * @brief extracts the information from pose and stores it in goal_pose which is
+ *        a global variable that can always be accessed
+ * @pre there should be a subscriber that is subscribed to a PoseStamped message
+ *      that represents the pose of the goal
+ * @post goal_pose is the pose of the goal (gps waypoint)
+ * @param geometry_msgs::PoseStamped pose - The pose of the goal that was recieved
+ *        via a message
+ */
 void target_callback(geometry_msgs::PoseStamped pose) {
     goal_pose.pose.position.x = pose.pose.position.x;
     goal_pose.pose.position.y = pose.pose.position.y;
@@ -70,14 +80,11 @@ double find_rotation(geometry_msgs::PoseStamped goal) {
 }
 
 /*
- * @fn double NavigationServer::calculate_angular(double robotAngle,
- *     double targetAngle)
+ * @fn double NavigationServer::calculate_angular()
  * @brief Finds the twist based on the target location and the robot location
  *        using a PID controller
- * @pre an angle for both the robot and the target based on -pi < theta < pi
+ * @pre a message is being published which contains the pose of the goal
  * @post calculates the angular velocity for the robot to navigate to a point
- * @param double robotAngle the angle of the robot with respect to east as 0
- * @param double targetAngle the angle of the target with respect to east as 0
  */
 double NavigationServer::calculate_angular() {
     double error, deriv, integ, prop;
@@ -95,6 +102,13 @@ double NavigationServer::calculate_angular() {
     return angular_vel;
 }
 
+/*
+ * @fn void NavigationServer::update()
+ * @brief updates the cmd_vel
+ * @pre there should be a subscriber that is subscribed to a PoseStamped message
+ *      that represents the pose of the goal
+ * @post cmd_vel is the twist to send to the robot
+ */
 void NavigationServer::update() {
     cmd_vel.angular.z = calculate_angular();
     cmd_vel.linear.x = .5;
