@@ -24,7 +24,7 @@ void target_callback(geometry_msgs::PoseStamped pose) {
  */
 NavigationServer::NavigationServer() {
     //Create the twist publisher which publishes to cmd_vel
-    twist_pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+    twist_pub = nh.advertise<geometry_msgs::Twist>("nav_twist", 1);
 
     //Create the target subscriber which subscribes to target_pub
     goal_sub = nh.subscribe<geometry_msgs::PoseStamped>("target_pub", 1,
@@ -54,7 +54,9 @@ double find_rotation(geometry_msgs::PoseStamped goal) {
 
     //Find the transform from "odom" frame to "map" frame
     try {
-        listener.lookupTransform("/odom", "/map", ros::Time::now(), transform);
+    	ros::Time now = ros::Time::now();
+    	listener.waitForTransform("/map", "/odom", now, ros::Duration(3.0));
+        listener.lookupTransform("/map", "/odom", ros::Time::now(), transform);
     } catch (tf::TransformException ex) {
         ROS_ERROR("%s", ex.what());
         ros::Duration(1.0).sleep();
