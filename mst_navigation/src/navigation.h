@@ -10,6 +10,7 @@
 #include <tf/transform_listener.h>
 
 #define PI 3.14159
+const double ROS_RATE = 30; //Hz
 
 class NavigationServer
 {
@@ -24,7 +25,6 @@ class NavigationServer
 		ros::Subscriber goal_sub;
 
 		//PID control variables
-		static const double ROS_RATE = 30; //Hz
 		double prev_error;
 		double prev_integ;
 		double prop_gain;

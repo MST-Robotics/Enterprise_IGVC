@@ -13,9 +13,12 @@ int main(int argc, char** argv)
     
     NavigationServer server;
 
+    ros::Rate rate(ROS_RATE);
+
     while(ros::ok()) {
         ros::spinOnce();
         server.update();
+        rate.sleep();
     }
 
     return 0;
