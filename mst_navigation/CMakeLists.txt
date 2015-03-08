@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 	driver_base
 	message_generation
 	cv_bridge
+	tf
 )
 
 find_package(OpenCV REQUIRED)
@@ -113,7 +114,7 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-add_executable(mst_navigation src/Pot_Nav.cpp)
+add_executable(mst_navigation src/navigation.cpp src/navigationServer.cpp)
 add_dependencies(mst_navigation mst_navigation_gencpp mst_navigation_gencfg)
 target_link_libraries(mst_navigation ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
