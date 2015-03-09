@@ -36,7 +36,7 @@ void target_callback(geometry_msgs::PoseStamped pose) {
  * parameter server
  ***********************************************************/
 void NavigationServer::setparamsCallback(Params &config, uint32_t level) {
-    ROS_INFO("Reconfigure Request: %d %d %d %d", config.prop_gain,
+    ROS_INFO("Reconfigure Request: %f %f %f %f", config.prop_gain,
             config.deriv_gain, config.integ_gain, config.linear_velocity);
 
     // set params
