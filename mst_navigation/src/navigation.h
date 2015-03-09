@@ -32,9 +32,6 @@ private:
     //PID control variables
     double prev_error;
     double prev_integ;
-    double prop_gain;
-    double deriv_gain;
-    double integ_gain;
 
     typedef mst_navigation::Navigation_ParamsConfig Params;
     typedef dynamic_reconfigure::Server<Params> ParamsServer;

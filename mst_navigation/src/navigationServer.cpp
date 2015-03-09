@@ -58,9 +58,6 @@ NavigationServer::NavigationServer() {
     //Set initial PID variables
     prev_error = M_PI;
     prev_integ = 0;
-    prop_gain = config.prop_gain;
-    deriv_gain = 1;
-    integ_gain = 1;
 
     //setup dynamic reconfigure
     cfg_callback = boost::bind(&NavigationServer::setparamsCallback, this, _1,
@@ -114,7 +111,9 @@ double NavigationServer::calculate_angular() {
     deriv = (ROS_RATE) * (error - prev_error);
     integ = (1 / ROS_RATE) * error + prev_integ;
 
-    angular_vel = prop_gain * error + integ_gain * integ + deriv_gain * deriv;
+    angular_vel = config.prop_gain * error
+            + config.integ_gain * integ
+            + config.deriv_gain * deriv;
 
     prev_error = error;
     prev_integ = integ;
@@ -131,7 +130,7 @@ double NavigationServer::calculate_angular() {
  */
 void NavigationServer::update() {
     cmd_vel.angular.z = calculate_angular();
-    cmd_vel.linear.x = .5;
+    cmd_vel.linear.x = config.linear_velocity;
     twist_pub.publish(cmd_vel);
 }
 
