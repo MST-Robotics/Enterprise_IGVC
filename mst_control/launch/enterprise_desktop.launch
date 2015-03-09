@@ -73,12 +73,7 @@
 
     <!--node pkg="mst_pointcloud" type="mst_pointcloud" name="mst_pointcloud"/-->
     
-    <node pkg="mst_navigation" type="mst_navigation" name="mst_navigation" >
-    
-      <!-- load parameters into parameter server -->
-      <rosparam file="$(find mst_control)/yaml/Pot_Nav.yaml" command="load" />
-
-    </node>
+    <node pkg="mst_navigation" type="mst_navigation" name="mst_navigation" />
     
     <node pkg="mst_control" type="mst_control" name="mst_control" required="true" >
         
