@@ -28,6 +28,21 @@ void target_callback(geometry_msgs::PoseStamped pose) {
     goal_pose.pose.orientation.z = pose.pose.orientation.z;
 }
 
+/***********************************************************
+ * @fn setparamsCallback(const sensor_msgs::ImageConstPtr& msg)
+ * @brief callback for the reconfigure gui
+ * @pre has to have the setup for the reconfigure gui
+ * @post changes the parameters on navigation to those from the
+ * parameter server
+ ***********************************************************/
+void NavigationServer::setparamsCallback(Params &config, uint32_t level) {
+    ROS_INFO("Reconfigure Request: %d %d %d %d", config.prop_gain,
+            config.deriv_gain, config.integ_gain, config.linear_velocity);
+
+    // set params
+    this->config = config;
+}
+
 /*
  * @fn NavigationServer::NavigationServer()
  * @brief The default constructor for the NavigationServer class
@@ -41,11 +56,16 @@ NavigationServer::NavigationServer() {
             target_callback);
 
     //Set initial PID variables
-    prev_error = PI;
+    prev_error = M_PI;
     prev_integ = 0;
-    prop_gain = 1;
+    prop_gain = config.prop_gain;
     deriv_gain = 1;
     integ_gain = 1;
+
+    //setup dynamic reconfigure
+    cfg_callback = boost::bind(&NavigationServer::setparamsCallback, this, _1,
+            _2);
+    cfg_server.setCallback(cfg_callback);
 }
 
 /*
@@ -64,8 +84,8 @@ double find_rotation(geometry_msgs::PoseStamped goal) {
 
     //Find the transform from "odom" frame to "map" frame
     try {
-    	ros::Time now = ros::Time::now();
-    	listener.waitForTransform("/map", "/odom", now, ros::Duration(3.0));
+        ros::Time now = ros::Time::now();
+        listener.waitForTransform("/map", "/odom", now, ros::Duration(3.0));
         listener.lookupTransform("/map", "/odom", ros::Time::now(), transform);
     } catch (tf::TransformException ex) {
         ROS_ERROR("%s", ex.what());

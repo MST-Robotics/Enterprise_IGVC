@@ -54,7 +54,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## Add dynamic reconfigure api
 generate_dynamic_reconfigure_options(
-  cfg/Pot_Nav_Params.cfg
+  cfg/Navigation_Params.cfg
 )
 
 ## Generate messages in the 'msg' folder
