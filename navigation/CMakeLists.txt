@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mst_navigation)
+project(navigation)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -12,12 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
 	dynamic_reconfigure
 	driver_base
 	message_generation
-	cv_bridge
 	tf
 )
-
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -54,7 +50,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## Add dynamic reconfigure api
 generate_dynamic_reconfigure_options(
-  cfg/Navigation_Params.cfg
+  cfg/TrackingNode_Params.cfg
 )
 
 ## Generate messages in the 'msg' folder
@@ -95,7 +91,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 # INCLUDE_DIRS include
-  LIBRARIES mst_navigation
+  LIBRARIES navigation
   CATKIN_DEPENDS mst_position dynamic_reconfigure
   DEPENDS system_lib
 )
@@ -114,9 +110,9 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-add_executable(mst_navigation src/navigation.cpp src/navigationServer.cpp)
-add_dependencies(mst_navigation mst_navigation_gencpp mst_navigation_gencfg)
-target_link_libraries(mst_navigation ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_executable(tracking src/tracking.cpp src/TrackingNode.cpp)
+add_dependencies(tracking tracking_gencpp tracking_gencfg)
+target_link_libraries(tracking ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

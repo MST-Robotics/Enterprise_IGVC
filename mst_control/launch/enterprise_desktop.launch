@@ -73,7 +73,7 @@
 
     <!--node pkg="mst_pointcloud" type="mst_pointcloud" name="mst_pointcloud"/-->
     
-    <node pkg="mst_navigation" type="mst_navigation" name="mst_navigation" />
+    <node pkg="navigation" type="tracking" name="navigation_tracking" />
     
     <node pkg="mst_control" type="mst_control" name="mst_control" required="true" >
         

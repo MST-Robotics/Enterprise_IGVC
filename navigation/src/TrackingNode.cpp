@@ -1,10 +1,10 @@
 /******************************************************************************
- * @file navigation.h
+ * @file TrackingNode.cpp
  * @author Matt Anderson <mia2n4@mst.edu>
- * @brief The definition file for the NavigationServer class
+ * @brief The definition file for the TrackingNode class
  ******************************************************************************/
 
-#include "navigation.h"
+#include "TrackingNode.h"
 
 geometry_msgs::PoseStamped goal_pose;
 
@@ -32,22 +32,19 @@ void target_callback(geometry_msgs::PoseStamped pose) {
  * @fn setparamsCallback(const sensor_msgs::ImageConstPtr& msg)
  * @brief callback for the reconfigure gui
  * @pre has to have the setup for the reconfigure gui
- * @post changes the parameters on navigation to those from the
+ * @post changes the parameters on TrackingNode to those from the
  * parameter server
  ***********************************************************/
-void NavigationServer::setparamsCallback(Params &config, uint32_t level) {
-    ROS_INFO("Reconfigure Request: %f %f %f %f", config.prop_gain,
-            config.deriv_gain, config.integ_gain, config.linear_velocity);
-
+void TrackingNode::setparamsCallback(Params &config, uint32_t level) {
     // set params
     this->config = config;
 }
 
 /*
- * @fn NavigationServer::NavigationServer()
- * @brief The default constructor for the NavigationServer class
+ * @fn TrackingNode::TrackingNode()
+ * @brief The default constructor for the TrackingNode class
  */
-NavigationServer::NavigationServer() {
+TrackingNode::TrackingNode() {
     //Create the twist publisher which publishes to cmd_vel
     twist_pub = nh.advertise<geometry_msgs::Twist>("nav_twist", 1);
 
@@ -60,13 +57,13 @@ NavigationServer::NavigationServer() {
     prev_integ = 0;
 
     //setup dynamic reconfigure
-    cfg_callback = boost::bind(&NavigationServer::setparamsCallback, this, _1,
+    cfg_callback = boost::bind(&TrackingNode::setparamsCallback, this, _1,
             _2);
     cfg_server.setCallback(cfg_callback);
 }
 
 /*
- * @fn double NavigationServer::find_rotation(geometry_msgs::PoseStamped goal)
+ * @fn double TrackingNode::find_rotation(geometry_msgs::PoseStamped goal)
  * @brief Finds the rotation angle
  * @pre A valid transform from odom to map
  * @post returns an angle which signifies the angle between the robot and the
@@ -74,7 +71,7 @@ NavigationServer::NavigationServer() {
  * @param geometry_msgs::PoseStamped goal This is the pose of the goal which
  *        only needs the position.
  */
-double find_rotation(geometry_msgs::PoseStamped goal) {
+double TrackingNode::find_rotation(geometry_msgs::PoseStamped goal) {
     double theta;
     tf::StampedTransform transform;
     tf::TransformListener listener;
@@ -103,7 +100,7 @@ double find_rotation(geometry_msgs::PoseStamped goal) {
  * @pre a message is being published which contains the pose of the goal
  * @post calculates the angular velocity for the robot to navigate to a point
  */
-double NavigationServer::calculate_angular() {
+double TrackingNode::calculate_angular() {
     double error, deriv, integ, prop;
     double angular_vel;     //rad/s
 
@@ -128,7 +125,7 @@ double NavigationServer::calculate_angular() {
  *      that represents the pose of the goal
  * @post cmd_vel is the twist to send to the robot
  */
-void NavigationServer::update() {
+void TrackingNode::update() {
     cmd_vel.angular.z = calculate_angular();
     cmd_vel.linear.x = config.linear_velocity;
     twist_pub.publish(cmd_vel);

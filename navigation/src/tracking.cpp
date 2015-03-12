@@ -1,23 +1,23 @@
 /******************************************************************************
-* @file navigation.cpp
+* @file tracking.cpp
 * @author Matt Anderson <mia2n4@mst.edu>
-* @brief The navigation code written for Enterprise
+* @brief The tracking code for Enterprise
 ******************************************************************************/
 
-#include "navigation.h"
+#include "TrackingNode.h"
 
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "navigation");
+    ros::init(argc, argv, "tracking");
     
-    NavigationServer server;
+    TrackingNode node;
 
     ros::Rate rate(ROS_RATE);
 
     while(ros::ok()) {
         ros::spinOnce();
-        server.update();
+        node.update();
         rate.sleep();
     }
 
