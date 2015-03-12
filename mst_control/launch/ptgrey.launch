@@ -1,11 +1,14 @@
 <launch>
 	<group>
-		<node pkg="camera1394" type="camera1394_node" name="ptgrey" args="camera:=ptgrey">
-			<param name="guid" value="00b09d0100bee3c5" />
-			<param name="camera_info_url" value="file:///$(find MST_Control)/yaml/ptgrey_calibration.yaml" />
-			<param name="bayer_pattern" value="rggb" />
-			<param name="bayer_method" value="Simple" />
-			<param name="frame_id" value="pt_grey_link" />
-		</node>
+		<node pkg="camera1394" type="camera1394_node" name="pt_grey"    >
+      		<param name="width" type="int" value="640" />
+      		<param name="height" type="int" value="480" />
+      		<param name="auto_brightness" value="2"/>
+      		<param name="auto_gain" value="2"/>
+      		<param name="auto_pan" value="2"/>
+      		<param name="auto_shutter" value="2"/>
+      		<param name="bayer_pattern" type="string" value="rggb"/>
+      		<param name="bayer_method" type="string" value="Simple"/>
+    	</node>
 	</group>
 </launch>
