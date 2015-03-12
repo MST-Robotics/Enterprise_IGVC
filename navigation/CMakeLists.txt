@@ -90,7 +90,7 @@ generate_dynamic_reconfigure_options(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-# INCLUDE_DIRS include
+  INCLUDE_DIRS include
   LIBRARIES navigation
   CATKIN_DEPENDS mst_position dynamic_reconfigure
   DEPENDS system_lib
@@ -102,7 +102,11 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  include
+  ../common
+)
 
 ## Declare a cpp library
 # add_library(mst_navigation
