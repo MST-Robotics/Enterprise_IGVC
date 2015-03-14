@@ -20,12 +20,6 @@
     <!-- conect to the specified master  -->
     <env name="ROS_MASTER_URI" value="http://$(arg robot_addr):11311" />
     
-    <!-- Launch the pt_grey camera -->
-    <include file="$(find mst_control)/launch/ptgrey.launch" />
-    
-    <!-- Launch the gps -->
-    <include file="$(find mst_control)/launch/gps.launch" />
-    
     <!-- launch joy package-->
     <node pkg="joy" type="joy_node" name="joy_node" respawn="true">
         <param name="deadzone" value=".1"/>
@@ -93,12 +87,15 @@
     <node pkg="urg_node" type="urg_node" name="lidar" >
     	<param name="serial_port" type="string" value="/dev/ttyACM0"/>
    	</node>
+   	
+   	<!-- Launch the pt_grey camera -->
+    <include file="$(find mst_control)/launch/ptgrey.launch" />
     
-    <node pkg="gmapping" type="slam_gmapping" name="gmapping" >
-    	<param name="map_update_interval" type="double" value="1.0" />
-    </node>
+    <!-- Launch the gps -->
+    <include file="$(find mst_control)/launch/gps.launch" />
     
-
+    <!-- Launch the gmapping -->
+    <include file="$(find mst_control)/launch/slam.launch" />
     
     <!-- launch rviz if requested -->
     <node name="rviz_desktop" pkg="rqt_rviz" type="rqt_rviz" args="-d $(find mst_control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
