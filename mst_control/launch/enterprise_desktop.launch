@@ -23,6 +23,9 @@
     <!-- Launch the pt_grey camera -->
     <include file="$(find mst_control)/launch/ptgrey.launch" />
     
+    <!-- Launch the gps -->
+    <include file="$(find mst_control)/launch/gps.launch" />
+    
     <!-- launch joy package-->
     <node pkg="joy" type="joy_node" name="joy_node" respawn="true">
         <param name="deadzone" value=".1"/>
@@ -81,8 +84,6 @@
     </group>
     
     <node pkg="rosserial_python" type="serial_node.py" name="arduino_node" args="/dev/ttyACM1" />  
-    
-    <node pkg="nmea_navsat_driver" type="nmea_serial_driver" name="gps_node" /> 
     
     <param name="robot_description" textfile="$(find mst_control)/urdf/robots/Enterprise2.URDF" />
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
