@@ -37,7 +37,7 @@
     
     <node pkg="mst_colorstat" type="ColorStat" name="ColorStat" args= "image:=camera/image_color" >
         
-      <rosparam file="$(find mst_control)/yaml/ColorStat.yaml" command="load" />
+      <rosparam file="$(find control)/yaml/ColorStat.yaml" command="load" />
 
     </node>
     
@@ -46,7 +46,7 @@
        
     <node pkg="mst_position" type="mst_position" name="mst_position">
         
-      <rosparam file="$(find mst_control)/yaml/Practice_Waypoints.yaml" command="load" />
+      <rosparam file="$(find control)/yaml/Practice_Waypoints.yaml" command="load" />
         
     </node>
 
@@ -54,9 +54,9 @@
     
     <node pkg="navigation" type="tracking" name="navigation_tracking" />
     
-    <node pkg="mst_control" type="mst_control" name="mst_control" required="true" >
+    <node pkg="control" type="control" name="control" required="true" >
         
-      <rosparam file="$(find mst_control)/yaml/Control.yaml" command="load" />
+      <rosparam file="$(find control)/yaml/Control.yaml" command="load" />
         
     </node>
     
@@ -79,7 +79,7 @@
     
     <node pkg="rosserial_python" type="serial_node.py" name="arduino_node" args="/dev/ttyACM1" />  
     
-    <param name="robot_description" textfile="$(find mst_control)/urdf/robots/Enterprise2.URDF" />
+    <param name="robot_description" textfile="$(find control)/urdf/robots/Enterprise2.URDF" />
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
     
     <node pkg="enterprise_description" type="enterprise_description_node" name="tf_broadcast" />
@@ -89,16 +89,16 @@
    	</node>
    	
    	<!-- Launch the pt_grey camera -->
-    <include file="$(find mst_control)/launch/ptgrey.launch" />
+    <include file="$(find control)/launch/ptgrey.launch" />
     
     <!-- Launch the gps -->
-    <include file="$(find mst_control)/launch/gps.launch" />
+    <include file="$(find control)/launch/gps.launch" />
     
     <!-- Launch the gmapping -->
-    <include file="$(find mst_control)/launch/slam.launch" />
+    <include file="$(find control)/launch/slam.launch" />
     
     <!-- launch rviz if requested -->
-    <node name="rviz_desktop" pkg="rqt_rviz" type="rqt_rviz" args="-d $(find mst_control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
+    <node name="rviz_desktop" pkg="rqt_rviz" type="rqt_rviz" args="-d $(find control)/vcg/Enterprise.rviz" if="$(arg rviz)"/>
     
 </launch>
 
