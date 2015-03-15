@@ -92,7 +92,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES navigation
-  CATKIN_DEPENDS mst_position dynamic_reconfigure
+  CATKIN_DEPENDS dynamic_reconfigure
   DEPENDS system_lib
 )
 
@@ -117,6 +117,10 @@ include_directories(
 add_executable(tracking src/tracking.cpp src/TrackingNode.cpp)
 add_dependencies(tracking tracking_gencpp tracking_gencfg)
 target_link_libraries(tracking ${catkin_LIBRARIES})
+
+add_executable(planning src/pathPlanning.cpp src/PathPlanningNode.cpp)
+add_dependencies(planning planning_gencpp planning_gencfg)
+target_link_libraries(planning ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
