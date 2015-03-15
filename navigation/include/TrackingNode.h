@@ -10,7 +10,7 @@
 #include <cmath>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Point.h>
 #include <tf/transform_listener.h>
 #include <dynamic_reconfigure/server.h>
 
@@ -43,7 +43,7 @@ private:
 
     void setparamsCallback(Params &config, uint32_t level);
 
-    static double find_rotation(geometry_msgs::PoseStamped goal);
+    static double find_rotation(geometry_msgs::Point goal);
 
 public:
     TrackingNode();
