@@ -5,6 +5,8 @@
  */
 
 //File Includes
+#include <iostream>
+#include <fstream>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <image_transport/image_transport.h>
@@ -40,6 +42,23 @@ void prepareImage();
  ***********************************************************/
 void edgeDetection();
 
+/***********************************************************
+ * @fn callibration();
+ * @brief callibrates the camera to compensate for fisheye
+ * @pre Must get valid image from the camera
+ * @post Returns the camera Matrix and the distance coeficents
+ ***********************************************************/
+void callibrate();
+
+/***********************************************************
+ * @fn fisheyeAdjust();
+ * @brief undistores the fisheye camera lens
+ * @pre Must get valid image from the camera
+ * Must also have a valid camera matrix and distance coefficents
+ * @post Returns an undistorted image
+ ***********************************************************/
+void fisheyeAdjust();
+
 //A place to store the frame from the camera.
 //Also the same Matrix that all of the changes are stored to
 cv_bridge::CvImagePtr frame;
@@ -47,6 +66,10 @@ cv_bridge::CvImagePtr frame;
 //A way to send and recieve the camera data from ROS
 image_transport::Subscriber sub;
 image_transport::Publisher pub;
+
+//do you want to callibrate the image, or not
+//If you want to do any image processing set this to 0
+bool callibrateImage = 1;
 
 int main(int argc, char **argv)
 {
@@ -76,6 +99,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 	//Get the image from the camera, and store it in frame
 	try
 	{
+		//Switch back to MONO8
 		frame = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8);
 	}
 	//Throw an error message if the camera data isn't correct
@@ -85,9 +109,19 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		return;
 	}
 
-	//Process the image
-	prepareImage();
-	edgeDetection();
+	if (callibrateImage)
+	{
+		//get the callibration settings for the camera
+		callibrate();
+	}
+	else
+	{
+		//undistrote image
+		//fisheyeAdjust();
+		//Process the image
+		prepareImage();
+		edgeDetection();
+	}
 
 	//Send the processed image back to ROS
 	pub.publish(frame->toImageMsg());
@@ -98,7 +132,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 //Makes the lines easier for canny to find
 void prepareImage()
 {
-  //Scale the image down and back up, to smooth the image and blur the colors
+	//Scale the image down and back up, to smooth the image and blur the colors
 	//Down scale the image to half the size of the original image
 	cv::pyrDown(frame->image, frame->image,
 			cv::Size(frame->image.cols / 2, frame->image.rows / 2));
@@ -145,5 +179,112 @@ void edgeDetection()
 	//PARAMATERS
 	cv::Canny(frame->image, frame->image, 100, (100 * 3), 3);
 
+	return;
+}
+
+//undistores the image
+void fisheyeAdjust()
+{
+	//create streams to text files
+	std::ifstream cameraMatrix;
+	std::ifstream distCoeffs;
+
+	//Open the files
+	cameraMatrix.open("cameraMatrix.txt");
+	distCoeffs.open("distCoeffs.txt");
+
+	//create the camera Matrix
+	cv::Mat camMatrix;
+
+	//cv::undistortImage(frame->image, frame->image,);
+
+	//close the file streams
+	cameraMatrix.close();
+	distCoeffs.close();
+	return;
+}
+
+//set the callibration settings for the Camera
+void callibrate()
+{
+	//create streams to text files
+	std::ofstream cameraMatrix;
+	std::ofstream distCoeffs;
+
+	//Open the files
+	cameraMatrix.open("cameraMatrix.txt");
+	distCoeffs.open("distCoeffs.txt");
+
+	if(!cameraMatrix.is_open())
+	{
+		ROS_INFO("cameraMatrix.txt not opened");
+	}
+	if(!distCoeffs.is_open())
+	{
+		ROS_INFO("distCoeffs.txt not opened");
+	}
+
+	int numBoards = 1;
+
+	int numRows = 5;
+	int numCols = 4;
+	int numSquares = (numRows * numCols);
+
+	cv::Size boardSize(numRows, numCols);
+
+	std::vector<std::vector<cv::Point3f> > objectPoints;
+	std::vector<std::vector<cv::Point2f> > imagePoints;
+	std::vector<cv::Point2f> corners;
+
+	int successes = 0;
+
+	std::vector<cv::Point3f> obj;
+	for (int i = 0; i < numSquares; ++i)
+	{
+		obj.push_back(cv::Point3f(i / numCols, i % numCols, 0.0f));
+	}
+
+	ROS_INFO("This works!");
+
+	while (successes < numBoards)
+	{
+		bool found = cv::findChessboardCorners(frame->image, boardSize, corners, CV_CALIB_CB_ADAPTIVE_THRESH);
+		if(found)
+		{
+			ROS_INFO("This works!!");
+			cv::cornerSubPix(frame->image, corners, cv::Size(11,11), cv::Size(-1,-1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
+			cv::drawChessboardCorners(frame->image, boardSize, corners, found);
+
+			imagePoints.push_back(corners);
+			objectPoints.push_back(obj);
+			ROS_INFO("This works!!!");
+
+			++successes;
+		}
+	}
+
+	cv::Mat cameraMat = cv::Mat(3,3,CV_32FC1);
+	cv::Mat distanceCoeffs;
+	std::vector<cv::Mat> rvecs;
+	std::vector<cv::Mat> tvecs;
+
+	cameraMat.ptr<float>(0)[0] = 1;
+	cameraMat.ptr<float>(1)[1] = 1;
+
+	ROS_INFO("This works!!!!");
+
+	cv::calibrateCamera(objectPoints, imagePoints, frame->image.size(), cameraMat, distanceCoeffs, rvecs, tvecs);
+
+	ROS_INFO("This works!!!!!");
+
+	cameraMatrix << "this Works";
+	distCoeffs << "this Works also";
+	ROS_INFO("This works!!!!!!");
+	//close the file streams
+	cameraMatrix.close();
+	distCoeffs.close();
+
+	callibrateImage = 0;
+	ROS_INFO("This worksFinal!");
 	return;
 }
