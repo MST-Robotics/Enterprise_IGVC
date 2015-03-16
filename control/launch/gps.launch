@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="nmea_navsat_driver" type="nmea_serial_driver" name="gps_node" /> 
+    
+</launch>

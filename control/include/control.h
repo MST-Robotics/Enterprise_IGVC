@@ -24,7 +24,7 @@
 #include "sensor_msgs/Joy.h"
 #include "geometry_msgs/Vector3.h"
 #include <std_msgs/UInt8.h>
-#include <mst_control/Velocity.h>
+#include <control/Velocity.h>
 
 /***********************************************************
 * Other includes
@@ -35,7 +35,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <dynamic_reconfigure/server.h>
-#include <mst_control/Control_ParamsConfig.h>
+#include <control/Control_ParamsConfig.h>
 
 /***********************************************************
 * Subscribers
@@ -121,7 +121,7 @@ enum Autonomous_Mode
 };
 Autonomous_Mode autonomous_mode;
 
-mst_control::Control_ParamsConfig params;
+control::Control_ParamsConfig params;
 
 /***************************************************************** 
 *This is where we changed it from wii_twist to geometry_twist.

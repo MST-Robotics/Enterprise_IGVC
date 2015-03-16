@@ -6,26 +6,22 @@
 
 #include "TrackingNode.h"
 
-geometry_msgs::PoseStamped goal_pose;
+geometry_msgs::Point goal_point;
 
-/*
+/**
  * @fn target_callback(geometry_msgs::PoseStamped pose)
- * @brief extracts the information from pose and stores it in goal_pose which is
+ * @brief extracts the information from pose and stores it in goal_point which is
  *        a global variable that can always be accessed
  * @pre there should be a subscriber that is subscribed to a PoseStamped message
  *      that represents the pose of the goal
- * @post goal_pose is the pose of the goal (gps waypoint)
+ * @post goal_point is the pose of the goal (gps waypoint)
  * @param geometry_msgs::PoseStamped pose - The pose of the goal that was recieved
  *        via a message
  */
-void target_callback(geometry_msgs::PoseStamped pose) {
-    goal_pose.pose.position.x = pose.pose.position.x;
-    goal_pose.pose.position.y = pose.pose.position.y;
-    goal_pose.pose.position.z = pose.pose.position.z;
-
-    goal_pose.pose.orientation.x = pose.pose.orientation.x;
-    goal_pose.pose.orientation.y = pose.pose.orientation.y;
-    goal_pose.pose.orientation.z = pose.pose.orientation.z;
+void target_callback(geometry_msgs::Point p) {
+    goal_point.x = p.x;
+    goal_point.y = p.y;
+    goal_point.z = p.z;
 }
 
 /***********************************************************
@@ -40,7 +36,7 @@ void TrackingNode::setparamsCallback(Params &config, uint32_t level) {
     this->config = config;
 }
 
-/*
+/**
  * @fn TrackingNode::TrackingNode()
  * @brief The default constructor for the TrackingNode class
  */
@@ -49,7 +45,7 @@ TrackingNode::TrackingNode() {
     twist_pub = nh.advertise<geometry_msgs::Twist>("nav_twist", 1);
 
     //Create the target subscriber which subscribes to target_pub
-    goal_sub = nh.subscribe<geometry_msgs::PoseStamped>("target_pub", 1,
+    goal_sub = nh.subscribe<geometry_msgs::Point>("target_pub", 1,
             target_callback);
 
     //Set initial PID variables
@@ -57,12 +53,11 @@ TrackingNode::TrackingNode() {
     prev_integ = 0;
 
     //setup dynamic reconfigure
-    cfg_callback = boost::bind(&TrackingNode::setparamsCallback, this, _1,
-            _2);
+    cfg_callback = boost::bind(&TrackingNode::setparamsCallback, this, _1, 2);
     cfg_server.setCallback(cfg_callback);
 }
 
-/*
+/**
  * @fn double TrackingNode::find_rotation(geometry_msgs::PoseStamped goal)
  * @brief Finds the rotation angle
  * @pre A valid transform from odom to map
@@ -71,7 +66,7 @@ TrackingNode::TrackingNode() {
  * @param geometry_msgs::PoseStamped goal This is the pose of the goal which
  *        only needs the position.
  */
-double TrackingNode::find_rotation(geometry_msgs::PoseStamped goal) {
+double TrackingNode::find_rotation(geometry_msgs::Point goal) {
     double theta;
     tf::StampedTransform transform;
     tf::TransformListener listener;
@@ -87,13 +82,13 @@ double TrackingNode::find_rotation(geometry_msgs::PoseStamped goal) {
     }
 
     //Find the angle that the robot must turn to in order to be facing the goal
-    theta = atan2((goal.pose.position.y - transform.getOrigin().y()),
-            (goal.pose.position.x - transform.getOrigin().x()));
+    theta = atan2((goal.y - transform.getOrigin().y()),
+                  (goal.x - transform.getOrigin().x()));
 
     return theta;
 }
 
-/*
+/**
  * @fn double NavigationServer::calculate_angular()
  * @brief Finds the twist based on the target location and the robot location
  *        using a PID controller
@@ -104,7 +99,7 @@ double TrackingNode::calculate_angular() {
     double error, deriv, integ, prop;
     double angular_vel;     //rad/s
 
-    error = find_rotation(goal_pose);
+    error = find_rotation(goal_point);
     deriv = (ROS_RATE) * (error - prev_error);
     integ = (1 / ROS_RATE) * error + prev_integ;
 
@@ -118,7 +113,7 @@ double TrackingNode::calculate_angular() {
     return angular_vel;
 }
 
-/*
+/**
  * @fn void NavigationServer::update()
  * @brief updates the cmd_vel
  * @pre there should be a subscriber that is subscribed to a PoseStamped message
@@ -126,8 +121,12 @@ double TrackingNode::calculate_angular() {
  * @post cmd_vel is the twist to send to the robot
  */
 void TrackingNode::update() {
+    cmd_vel.angular.x = 0;
+    cmd_vel.angular.y = 0;
     cmd_vel.angular.z = calculate_angular();
     cmd_vel.linear.x = config.linear_velocity;
+    cmd_vel.linear.y = 0;
+    cmd_vel.linear.z = 0;
     twist_pub.publish(cmd_vel);
 }
 

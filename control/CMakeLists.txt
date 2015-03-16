@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mst_control)
+project(control)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -89,7 +89,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES mst_control
+  LIBRARIES control
   CATKIN_DEPENDS mst_position dynamic_reconfigure message_runtime
   DEPENDS system_lib
 )
@@ -108,19 +108,19 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(mst_control
-#   src/${PROJECT_NAME}/mst_control.cpp
+# add_library(control
+#   src/${PROJECT_NAME}/control.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(mst_control src/control.cpp)
+add_executable(control src/control.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(mst_control mst_control_gencpp mst_control_gencfg)
+add_dependencies(control control_gencpp control_gencfg)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(mst_control
+target_link_libraries(control
    ${catkin_LIBRARIES}
 )
 
@@ -139,7 +139,7 @@ target_link_libraries(mst_control
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS mst_control mst_control_node
+# install(TARGETS control control_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -164,7 +164,7 @@ target_link_libraries(mst_control
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_mst_control.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_control.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

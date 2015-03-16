@@ -22,7 +22,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://mst_control/urdf/meshes/base_link.STL" />
+          filename="package://control/urdf/meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -36,7 +36,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://mst_control/urdf/meshes/base_link.STL" />
+          filename="package://control/urdf/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -62,7 +62,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://mst_control/urdf/meshes/Camera.STL" />
+          filename="package://control/urdf/meshes/Camera.STL" />
       </geometry>
       <material
         name="">
@@ -76,7 +76,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://mst_control/urdf/meshes/Camera.STL" />
+          filename="package://control/urdf/meshes/Camera.STL" />
       </geometry>
     </collision>
   </link>

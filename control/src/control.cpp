@@ -66,7 +66,7 @@ void check_shift(const sensor_msgs::Joy::ConstPtr& joy) {
 
 void update_velocity(float right_vel, float left_vel) {
 
-    mst_control::Velocity velocity;
+    control::Velocity velocity;
 
     //Modify the velocity message to send to the motors
     velocity.right_vel = abs(right_vel) * MOTOR_SPEED_MAX * speed_mult;
@@ -116,6 +116,24 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
 
     joy_r_trigger = joy->axes[5];
     joy_l_trigger = joy->axes[2];
+
+    // Say stuff when you press the d-pad buttons
+    if (check_togg(joy->buttons[joy_dpad_up], joy_dpad_up))
+    {
+	sc->say("Butt");
+    }
+    else if (check_togg(joy->buttons[joy_dpad_dwn], joy_dpad_dwn))
+    {
+	sc->say("Outta my wayyyyyy");
+    }
+    else if (check_togg(joy->buttons[joy_dpad_l], joy_dpad_l))
+    {
+	sc->say("I will eat your first born child");
+    }
+    else if (check_togg(joy->buttons[joy_dpad_r], joy_dpad_r))
+    {
+	sc->say(" Beeeeeppp Beeeeeppppp");
+    }
 
     switch (robot_mode) {
     case arcade_mode:
@@ -177,7 +195,7 @@ void navigation_callback(const geometry_msgs::Twist twist) {
  * @pre has to have the setup for the reconfigure gui
  * @post changes the parameters
  ***********************************************************/
-void setparamsCallback(mst_control::Control_ParamsConfig &config, uint32_t level) {
+void setparamsCallback(control::Control_ParamsConfig &config, uint32_t level) {
     // Get the parameters from the parameter server
     params = config;
 }
@@ -214,7 +232,7 @@ int main(int argc, char **argv) {
     xbox_state_sub = n.subscribe<sensor_msgs::Joy>(TOPIC_JOY, 1, joy_callback);
 
     //Create publishers
-    motor_pub = n.advertise<mst_control::Velocity>(TOPIC_VELOCITY, 1);
+    motor_pub = n.advertise<control::Velocity>(TOPIC_VELOCITY, 1);
     light_pub = n.advertise<std_msgs::UInt8>(TOPIC_INDICATOR_LIGHT, 1);
 
     //Set ros loop rate to 30Hz
