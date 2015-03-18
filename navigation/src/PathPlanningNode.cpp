@@ -68,8 +68,10 @@ geometry_msgs::Point PathPlanningNode::toRobotFrame(geometry_msgs::Point p1) {
     //Find the transform from "odom" frame to "map" frame
     try {
         ros::Time now = ros::Time::now();
-        listener.waitForTransform("/odom", "/base_link", now, ros::Duration(3.0));
-        listener.lookupTransform("/odom", "/base_link", ros::Time::now(), transform);
+        listener.waitForTransform("/odom", "/base_link", now,
+                ros::Duration(3.0));
+        listener.lookupTransform("/odom", "/base_link", ros::Time::now(),
+                transform);
     } catch (tf::TransformException ex) {
         ROS_ERROR("%s", ex.what());
         ros::Duration(1.0).sleep();
@@ -80,6 +82,42 @@ geometry_msgs::Point PathPlanningNode::toRobotFrame(geometry_msgs::Point p1) {
     p.z = 0;
 
     return p;
+}
+
+/**
+ * @fn PathPlanningNode::readWaypoints()
+ * @brief Fills the queue waypoints with the waypoints found in the file
+ *        specified by the class constant filename
+ * @pre A file at filename that contains gps waypoints.  The file should be
+ *      formatted with a longitude and a latitude seperated by a space on each
+ *      line
+ * @post The waypoints queue will be filled with the waypoints the robot should
+ *       drive to
+ */
+void PathPlanningNode::readWaypoints() {
+    std::ifstream in;
+    std::string line;
+    geometry_msgs::Point gps_point;
+
+    try {
+        in.open(FILENAME.c_str());
+    } catch (std::ifstream::failure e) {
+        ROS_ERROR("No file found by the name of %s! Please create this waypoint file.",
+                FILENAME.c_str());
+    }
+
+    //The z axis is unused
+    gps_point.z = 0;
+
+    while (!in.eof()) {
+        in >> line;
+        gps_point.x = atof(line.c_str());
+        in >> line;
+        gps_point.y = atof(line.c_str());
+        waypoints.push(gps_point);
+    }
+
+    in.close();
 }
 
 /**
@@ -105,9 +143,12 @@ PathPlanningNode::PathPlanningNode() {
 
     goal_pub = nh.advertise<geometry_msgs::Point>("/target_pub", 1);
 
-    //set goal, static for now
-    goal.y =  37.956714;
-    goal.x = -91.774622;
+    //Read in the waypoints
+    readWaypoints();
+
+    //set the first goal
+    current_goal = waypoints.front();
+    waypoints.pop();
 }
 
 /**
@@ -117,5 +158,5 @@ PathPlanningNode::PathPlanningNode() {
  * @post A new goal is published
  */
 void PathPlanningNode::update() {
-    goal_pub.publish(toRobotFrame(goal));
+    goal_pub.publish(toRobotFrame(current_goal));
 }

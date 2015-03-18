@@ -13,6 +13,11 @@
 #include <tf/transform_listener.h>
 
 #include <cmath>
+#include <queue>
+#include <fstream>
+#include <cstdlib>
+
+const std::string FILENAME = "/home/enterprise/waypoints.txt";
 
 class PathPlanningNode {
 private:
@@ -21,12 +26,13 @@ private:
     ros::Subscriber gps_sub;
     ros::Publisher goal_pub;
 
-    geometry_msgs::Point goal;
+    std::queue<geometry_msgs::Point> waypoints;
+    geometry_msgs::Point current_goal;
 
     double findDistance(geometry_msgs::Point p1, geometry_msgs::Point p2);
     double findAngle(geometry_msgs::Point p1, geometry_msgs::Point p2);
     geometry_msgs::Point toRobotFrame(geometry_msgs::Point p1);
-
+    void readWaypoints();
 
 public:
     PathPlanningNode();
