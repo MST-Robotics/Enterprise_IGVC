@@ -117,6 +117,24 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     joy_r_trigger = joy->axes[5];
     joy_l_trigger = joy->axes[2];
 
+    // Say stuff when you press the d-pad buttons
+    if (check_togg(joy->buttons[joy_dpad_up], joy_dpad_up))
+    {
+	sc->say("Butt");
+    }
+    else if (check_togg(joy->buttons[joy_dpad_dwn], joy_dpad_dwn))
+    {
+	sc->say("Outta my wayyyyyy");
+    }
+    else if (check_togg(joy->buttons[joy_dpad_l], joy_dpad_l))
+    {
+	sc->say("I will eat your first born child");
+    }
+    else if (check_togg(joy->buttons[joy_dpad_r], joy_dpad_r))
+    {
+	sc->say(" Beeeeeppp Beeeeeppppp");
+    }
+
     switch (robot_mode) {
     case arcade_mode:
 
