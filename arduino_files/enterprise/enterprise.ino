@@ -11,7 +11,7 @@
 
 #include <ros.h>
 
-#include <mst_control/Velocity.h>
+#include <control/Velocity.h>
 #include <std_msgs/UInt8.h>
 #include <geometry_msgs/Quaternion.h>
 
@@ -43,7 +43,7 @@ const int ADDR_MAGNETOMETER = 0x1E;
  * Forward delerations
  *******************************************************************************/
 
-void VelocityCallback(const mst_control::Velocity &msg);
+void VelocityCallback(const control::Velocity &msg);
 void LightCallback(const std_msgs::UInt8 &msg);
 
 
@@ -89,7 +89,7 @@ geometry_msgs::Quaternion imuMessage;
 ros::Publisher imuPub("imu", &imuMessage);
 
 // ROS Subscriber for Velocity messages
-ros::Subscriber<mst_control::Velocity> velocitySub("cmd_vel", &VelocityCallback);
+ros::Subscriber<control::Velocity> velocitySub("cmd_vel", &VelocityCallback);
 
 // ROS Subscriber for Light messages
 ros::Subscriber<std_msgs::UInt8> lightSub("indicator_light", &LightCallback);
@@ -100,7 +100,7 @@ ros::Subscriber<std_msgs::UInt8> lightSub("indicator_light", &LightCallback);
  *******************************************************************************/
 
 // Callback for Velocity, gets the left and right wheel velocity and direction
-void VelocityCallback(const mst_control::Velocity &msg) {
+void VelocityCallback(const control::Velocity &msg) {
     analogWrite(PIN_LEFT_VELOCITY, msg.left_vel);
     analogWrite(PIN_RIGHT_VELOCITY, msg.right_vel);
     digitalWrite(PIN_LEFT_DIRECTION, !msg.left_dir);
