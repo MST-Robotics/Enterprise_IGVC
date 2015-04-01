@@ -120,19 +120,19 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     // Say stuff when you press the d-pad buttons
     if (check_togg(joy->buttons[joy_dpad_up], joy_dpad_up))
     {
-	sc->say("Butt");
+	sc->say("My name is Enterprise");
     }
     else if (check_togg(joy->buttons[joy_dpad_dwn], joy_dpad_dwn))
     {
-	sc->say("Outta my wayyyyyy");
+    sc->say("Welcome to Missouri S and T");
     }
     else if (check_togg(joy->buttons[joy_dpad_l], joy_dpad_l))
     {
-	sc->say("I will eat your first born child");
+    sc->say("It smells like up dog in here");
     }
     else if (check_togg(joy->buttons[joy_dpad_r], joy_dpad_r))
     {
-	sc->say(" Beeeeeppp Beeeeeppppp");
+	sc->say(" Hello");
     }
 
     switch (robot_mode) {
