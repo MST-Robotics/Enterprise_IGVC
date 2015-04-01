@@ -8,13 +8,14 @@
 #include <iostream>
 #include <fstream>
 #include <ros/ros.h>
-#include <sensor_msgs/Image.h>
+//#include <sensor_msgs/Image.h>
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv/cv.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+
 
 /***********************************************************
  * @fn imageCallback(const sensor_msgs::ImageConstPtr& msg);
@@ -79,7 +80,7 @@ int main(int argc, char **argv)
 	image_transport::ImageTransport it(nh);
 
 	//Set the subscriber to listen to data from the camera1394 node
-	sub = it.subscribe("usb_cam/image_raw", 1, imageCallback);
+	sub = it.subscribe("camera/image_raw", 1, imageCallback);
 	//Send data out with the tag image_lines
 	pub = it.advertise("image_lines", 1);
 
@@ -117,7 +118,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 	else
 	{
 		//undistrote image
-		//fisheyeAdjust();
+		fisheyeAdjust();
 		//Process the image
 		prepareImage();
 		edgeDetection();
@@ -189,18 +190,17 @@ void fisheyeAdjust()
 	std::ifstream cameraMatrix;
 	std::ifstream distCoeffs;
 
-	//Open the files
-	cameraMatrix.open("cameraMatrix.txt");
-	distCoeffs.open("distCoeffs.txt");
-
 	//create the camera Matrix
-	cv::Mat camMatrix;
+	cv::Mat cameraMat = cv::Mat(3,3,CV_32FC1);
+	cv::Mat distanceCoeffs;
 
-	//cv::undistortImage(frame->image, frame->image,);
+    cameraMat = cv::imread("/home/enterprise/enterprise_ws/src/vision/src/cameraMatrix.txt", 0);
+    distanceCoeffs = cv::imread("/home/enterprise/enterprise_ws/src/vision/src/distCoeffs.txt", 0);
 
-	//close the file streams
-	cameraMatrix.close();
-	distCoeffs.close();
+    cv::Mat temp;
+	cv::fisheye::undistortImage(frame->image, temp, cameraMat, distanceCoeffs, cv::noArray(), frame->image.size());
+	frame->image = temp;
+
 	return;
 }
 
@@ -212,8 +212,8 @@ void callibrate()
 	std::ofstream distCoeffs;
 
 	//Open the files
-	cameraMatrix.open("cameraMatrix.txt");
-	distCoeffs.open("distCoeffs.txt");
+	cameraMatrix.open("/home/enterprise/enterprise_ws/src/vision/src/cameraMatrix.txt");
+	distCoeffs.open("/home/enterprise/enterprise_ws/src/vision/src/distCoeffs.txt");
 
 	if(!cameraMatrix.is_open())
 	{
@@ -244,20 +244,16 @@ void callibrate()
 		obj.push_back(cv::Point3f(i / numCols, i % numCols, 0.0f));
 	}
 
-	ROS_INFO("This works!");
-
 	while (successes < numBoards)
 	{
-		bool found = cv::findChessboardCorners(frame->image, boardSize, corners, CV_CALIB_CB_ADAPTIVE_THRESH);
+		bool found = cv::findChessboardCorners(frame->image, boardSize, corners, 1); //CV_CALIB_CB_ADAPTIVE_THRESH = integer 1
 		if(found)
 		{
-			ROS_INFO("This works!!");
 			cv::cornerSubPix(frame->image, corners, cv::Size(11,11), cv::Size(-1,-1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
 			cv::drawChessboardCorners(frame->image, boardSize, corners, found);
 
 			imagePoints.push_back(corners);
 			objectPoints.push_back(obj);
-			ROS_INFO("This works!!!");
 
 			++successes;
 		}
@@ -271,20 +267,17 @@ void callibrate()
 	cameraMat.ptr<float>(0)[0] = 1;
 	cameraMat.ptr<float>(1)[1] = 1;
 
-	ROS_INFO("This works!!!!");
-
 	cv::calibrateCamera(objectPoints, imagePoints, frame->image.size(), cameraMat, distanceCoeffs, rvecs, tvecs);
 
-	ROS_INFO("This works!!!!!");
 
-	cameraMatrix << "this Works";
-	distCoeffs << "this Works also";
-	ROS_INFO("This works!!!!!!");
+	cameraMatrix << cameraMat;
+	distCoeffs << distanceCoeffs;
+
 	//close the file streams
 	cameraMatrix.close();
 	distCoeffs.close();
 
 	callibrateImage = 0;
-	ROS_INFO("This worksFinal!");
+	ROS_INFO("Calibration succsefull");
 	return;
 }
