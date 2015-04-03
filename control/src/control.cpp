@@ -203,7 +203,7 @@ void setparamsCallback(control::Control_ParamsConfig &config, uint32_t level) {
 /*******************************************************************************
  * @fn main(int argc, char **argv)state.buttons[state.MSG_BTN_HOME]
  * @brief starts the Control node and publishes motor commands
- *******************************************************************************/
+ ******************************************************************************/
 int main(int argc, char **argv) {
     ros::init(argc, argv, "Control");
     ros::NodeHandle n;
@@ -257,29 +257,6 @@ int main(int argc, char **argv) {
     }
 
     return 0;
-}
-
-/*******************************************************************************
- * @fn check_togg(bool button_state, int button_position)
- * @brief Toggles an xbox buttons value in xtogg array to button state
- * @pre An xbox controller should be enabled and a button should be pressed
- * @post The value of the button in xtogg array is toggled based on its previous
- *       value
- * @param bool button_state The previous state of the button
- * @param bool button_position The number assigned to the button by the joy node
- *******************************************************************************/
-bool check_togg(bool button_state, int button_position) {
-    bool togg = false;
-
-    if (button_state && !xtogg[button_position]) {
-        xtogg[button_position] = true;
-
-        togg = true;
-    } else if (!button_state) {
-        xtogg[button_position] = false;
-    }
-
-    return togg;
 }
 
 /*******************************************************************************

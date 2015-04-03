@@ -114,13 +114,19 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(control src/control.cpp)
+add_executable(moon_control src/moonshot.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(control control_gencpp control_gencfg)
+add_dependencies(moon_control moon_control_gencpp moon_control_gencfg)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(control
+   ${catkin_LIBRARIES}
+)
+
+target_link_libraries(moon_control
    ${catkin_LIBRARIES}
 )
 

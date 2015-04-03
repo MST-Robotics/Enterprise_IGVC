@@ -17,6 +17,8 @@ const char* TOPIC_NAVIGATION_TWIST = "nav_twist";
 const char* TOPIC_JOY = "joy";
 const char* TOPIC_VELOCITY = "cmd_vel";
 const char* TOPIC_INDICATOR_LIGHT = "indicator_light";
+const char* TOPIC_CONVEYER = "conveyer";
+const char* TOPIC_DUMP = "dump";
 
 
 #endif /* COMMON_STRING_CONSTANTS_H_ */

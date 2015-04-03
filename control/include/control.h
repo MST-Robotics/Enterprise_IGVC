@@ -7,7 +7,10 @@
  * @Re-made for xbox_Mode
  ******************************************************************************/
  
- /***********************************************************
+#ifndef CONTROL_H
+#define CONTROL_H
+ 
+/***********************************************************
 * ROS specific includes
 ***********************************************************/
 #include "ros/ros.h"
@@ -148,5 +151,30 @@ using namespace std;
 void change_mode(Mode new_mode);
 void stop_robot();
 bool check_togg(bool, int);
+
+/*******************************************************************************
+ * @fn check_togg(bool button_state, int button_position)
+ * @brief Toggles an xbox buttons value in xtogg array to button state
+ * @pre An xbox controller should be enabled and a button should be pressed
+ * @post The value of the button in xtogg array is toggled based on its previous
+ *       value
+ * @param bool button_state The previous state of the button
+ * @param bool button_position The number assigned to the button by the joy node
+ *******************************************************************************/
+bool check_togg(bool button_state, int button_position) {
+    bool togg = false;
+
+    if (button_state && !xtogg[button_position]) {
+        xtogg[button_position] = true;
+
+        togg = true;
+    } else if (!button_state) {
+        xtogg[button_position] = false;
+    }
+
+    return togg;
+}
+
+#endif
     
 
