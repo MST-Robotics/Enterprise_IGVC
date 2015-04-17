@@ -17,7 +17,7 @@
 #include <std_msgs/Int8.h>
 #include <geometry_msgs/Quaternion.h>
 
-#include <Wire.h>
+//#include <Wire.h>
 
 
 /*******************************************************************************
@@ -243,6 +243,7 @@ void updateLight() {
     }
 }
 
+/*
 void updateIMU() {
     unsigned long currentMillis = millis();
      
@@ -281,7 +282,7 @@ void updateIMU() {
         //publish message
         imuPub.publish(&imuMessage);
     }
-}
+}*/
 
 
 /*******************************************************************************
@@ -316,13 +317,15 @@ void setup() {
     nodeHandle.subscribe(velocitySub);
     nodeHandle.subscribe(lightSub);
     nodeHandle.advertise(imuPub);
-    
+    nodeHandle.subscribe(conveyerSub);
+    nodeHandle.subscribe(dumpSub);    
     // Setup magnetometer
+    /*
     Wire.begin();
     Wire.beginTransmission(ADDR_MAGNETOMETER);
     Wire.write(0x02); //select mode register
     Wire.write(0x00); //continuos measurement
-    Wire.endTransmission();
+    Wire.endTransmission();*/
 }
 
 
@@ -332,7 +335,7 @@ void setup() {
 
 void loop() {
     nodeHandle.spinOnce();
-    updateIMU();
+    //updateIMU();
     updateLight();
 }
 
