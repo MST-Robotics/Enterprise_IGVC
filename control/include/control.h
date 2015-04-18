@@ -152,6 +152,11 @@ void change_mode(Mode new_mode);
 void stop_robot();
 bool check_togg(bool, int);
 
+float mapminmax(float x, float xmax, float xmin, float ymax, float ymin) 
+{
+    return (ymax - ymin) * (x - xmin) / (xmax - xmin) + ymin;
+}
+
 /*******************************************************************************
  * @fn check_togg(bool button_state, int button_position)
  * @brief Toggles an xbox buttons value in xtogg array to button state

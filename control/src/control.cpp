@@ -80,10 +80,6 @@ void update_velocity(float right_vel, float left_vel) {
 
 }
 
-float mapminmax(float x, float xmax, float xmin, float ymax, float ymin) {
-    return (ymax - ymin) * (x - xmin) / (xmax - xmin) + ymin;
-}
-
 float get_right_velocity(float linearVelocity, float angularVelocity) {
     float v_right = (2 * linearVelocity + angularVelocity * ROBOT_BASE)
             / (2 * WHEEL_RADIUS);

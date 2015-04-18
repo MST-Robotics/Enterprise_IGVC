@@ -11,6 +11,7 @@
 
 ros::Publisher conveyer_pub;
 ros::Publisher dump_pub;
+const float maxConveyerSpeed = 225;
 
 /*******************************************************************************
  * @fn joy_callback(const sensor_msgs::Joy::ConstPtr& joy)
@@ -25,15 +26,15 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     std_msgs::Int8 dump;
     
     dump.data = 0;
-
-    //Check for dpad buttons to run the conveyer
-    if(check_togg(joy->buttons[joy_dpad_up], joy_dpad_up))
+    
+    //Check for triggers to run the conveyer
+    if(joy_r_trigger > 0)
     {
-        conveyer.data = 127;
+        conveyer.data = mapminmax(joy_r_trigger, 1.0, 0.0, maxConveyerSpeed, 0.0);
     }
-    else if(check_togg(joy->buttons[joy_dpad_dwn], joy_dpad_dwn))
+    else if(joy_l_trigger > 0 )
     {
-        conveyer.data = -127;
+        conveyer.data = mapminmax(joy_l_trigger, 1.0, 0.0, (-1 *maxConveyerSpeed), 0.0);
     }
 
     //Check for dpad buttons to run the dump
