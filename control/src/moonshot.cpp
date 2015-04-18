@@ -23,6 +23,8 @@ ros::Publisher dump_pub;
 void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     std_msgs::Int16 conveyer;
     std_msgs::Int8 dump;
+    
+    dump.data = 0;
 
     //Check for dpad buttons to run the conveyer
     if(check_togg(joy->buttons[joy_dpad_up], joy_dpad_up))
@@ -35,11 +37,11 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     }
 
     //Check for dpad buttons to run the dump
-    if(check_togg(joy->buttons[joy_dpad_l], joy_dpad_l))
+    if(joy->buttons[joy_dpad_l])
     {
         dump.data = -1;
     }
-    else if(check_togg(joy->buttons[joy_dpad_r], joy_dpad_r))
+    else if(joy->buttons[joy_dpad_r])
     {
         dump.data = 1;
     }

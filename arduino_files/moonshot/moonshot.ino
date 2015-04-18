@@ -19,16 +19,21 @@
 
 //#include <Wire.h>
 
+const int PIN_DUMP_UP1 = 31;
+const int PIN_DUMP_UP2 = 35;
+const int PIN_DUMP_DOWN1 = 33;
+const int PIN_DUMP_DOWN2 = 37;
+
 
 /*******************************************************************************
  * Constants
  *******************************************************************************/
 // Pin configurations
-const int PIN_ENABLE_FL = 24;
-const int PIN_ENABLE_FR = 26;
-const int PIN_ENABLE_BL = 28;
-const int PIN_ENABLE_BR = 30;
-const int PIN_ENABLE_CON = 32;
+const int PIN_ENABLE_FL = 22;  //Number 1
+const int PIN_ENABLE_FR = 24;  //Number 2
+const int PIN_ENABLE_BL = 26;  //Number 3
+const int PIN_ENABLE_BR = 28;  //Number 4
+const int PIN_ENABLE_CON = 30; //Number 5
 
 const int PIN1_SET_FL = 2;
 const int PIN2_SET_FL = 3;
@@ -42,6 +47,10 @@ const int PIN1_SET_CON = 10;
 const int PIN2_SET_CON = 11;
 
 const int PIN_LIGHT = 7;
+
+const  int maxSpeed = 225;
+float leftSpeedScaled;
+float rightSpeedScaled;
 
 // light update interval
 const unsigned long LIGHT_INTERVAL = 1000; // milliseconds
@@ -130,21 +139,22 @@ void VelocityCallback(const control::Velocity &msg) {
   //Compute direction and velocities of left motors
   else
   {
+    leftSpeedScaled = map(msg.left_vel,0,255,0,maxSpeed);
     digitalWrite(PIN_ENABLE_FL, HIGH);
     digitalWrite(PIN_ENABLE_BL, HIGH);
     if(!msg.left_dir)
     {
-      analogWrite(PIN1_SET_FL, msg.left_vel);
+      analogWrite(PIN1_SET_FL, leftSpeedScaled);
       analogWrite(PIN2_SET_FL, 0);
-      analogWrite(PIN1_SET_BL, msg.left_vel);
+      analogWrite(PIN1_SET_BL, leftSpeedScaled);
       analogWrite(PIN2_SET_BL, 0);
     }
     else
     {
       analogWrite(PIN1_SET_FL, 0);
-      analogWrite(PIN2_SET_FL, msg.left_vel);
+      analogWrite(PIN2_SET_FL, leftSpeedScaled);
       analogWrite(PIN1_SET_BL, 0);
-      analogWrite(PIN2_SET_BL, msg.left_vel);
+      analogWrite(PIN2_SET_BL, leftSpeedScaled);
     }
   }
   
@@ -157,21 +167,22 @@ void VelocityCallback(const control::Velocity &msg) {
   //Compute direction and velocities of left motors
   else
   {
+    rightSpeedScaled = map(msg.right_vel,0,255,0,maxSpeed);
     digitalWrite(PIN_ENABLE_FR, HIGH);
     digitalWrite(PIN_ENABLE_BR, HIGH);
-    if(!msg.left_dir)
+    if(!msg.right_dir)
     {
-      analogWrite(PIN1_SET_FR, msg.right_vel);
+      analogWrite(PIN1_SET_FR, rightSpeedScaled);
       analogWrite(PIN2_SET_FR, 0);
-      analogWrite(PIN1_SET_BR, msg.right_vel);
+      analogWrite(PIN1_SET_BR, rightSpeedScaled);
       analogWrite(PIN2_SET_BR, 0);
     }
     else
     {
       analogWrite(PIN1_SET_FR, 0);
-      analogWrite(PIN2_SET_FR, msg.right_vel);
+      analogWrite(PIN2_SET_FR, rightSpeedScaled);
       analogWrite(PIN1_SET_BR, 0);
-      analogWrite(PIN2_SET_BR, msg.right_vel);
+      analogWrite(PIN2_SET_BR, rightSpeedScaled);
     }
   }
 }
@@ -207,7 +218,33 @@ void ConveyerCallback(const std_msgs::Int16 &msg) {
 
 void DumpCallback(const std_msgs::Int8 &msg)
 {
-  
+    switch(msg.data)
+    {
+         //Up
+         case 1:
+             digitalWrite(PIN_DUMP_UP1, LOW);
+             digitalWrite(PIN_DUMP_UP2, LOW);
+             digitalWrite(PIN_DUMP_DOWN1, HIGH);
+             digitalWrite(PIN_DUMP_DOWN2, HIGH);
+             break;
+             
+         //Down
+         case -1:
+             digitalWrite(PIN_DUMP_UP1, HIGH);
+             digitalWrite(PIN_DUMP_UP2, HIGH);
+             digitalWrite(PIN_DUMP_DOWN1, LOW);
+             digitalWrite(PIN_DUMP_DOWN2, LOW);
+             break;
+         
+         //off
+         default:
+             digitalWrite(PIN_DUMP_UP1, HIGH);
+             digitalWrite(PIN_DUMP_UP2, HIGH);
+             digitalWrite(PIN_DUMP_DOWN1, HIGH);
+             digitalWrite(PIN_DUMP_DOWN2, HIGH);
+             break;
+           
+    }
 }
 
 
@@ -309,8 +346,18 @@ void setup() {
     pinMode(PIN2_SET_CON, OUTPUT);
     pinMode(PIN_LIGHT, OUTPUT);
     
+    pinMode(PIN_DUMP_UP1, OUTPUT);
+    pinMode(PIN_DUMP_UP2, OUTPUT);
+    pinMode(PIN_DUMP_DOWN1, OUTPUT);
+    pinMode(PIN_DUMP_DOWN2, OUTPUT);
+    
     // Light starts out as off
     digitalWrite(PIN_LIGHT, LOW);
+    
+    digitalWrite(PIN_DUMP_UP1, HIGH);
+    digitalWrite(PIN_DUMP_UP2, HIGH);
+    digitalWrite(PIN_DUMP_DOWN1, HIGH);
+    digitalWrite(PIN_DUMP_DOWN2, HIGH);
     
     // Setup ROS node and topics
     nodeHandle.initNode();
