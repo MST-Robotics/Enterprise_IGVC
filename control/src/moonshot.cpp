@@ -25,16 +25,19 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     std_msgs::Int16 conveyer;
     std_msgs::Int8 dump;
     
-    dump.data = 0;
+    conveyer.data = 0;
+    
+    float left_trig = (joy->axes[2] * (-1) + 1)/2;
+    float right_trig = (joy->axes[5] * (-1) + 1)/2;
     
     //Check for triggers to run the conveyer
-    if(joy_r_trigger > 0)
+    if(right_trig > 0)
     {
-        conveyer.data = mapminmax(joy_r_trigger, 1.0, 0.0, maxConveyerSpeed, 0.0);
+        conveyer.data = right_trig*maxConveyerSpeed;
     }
-    else if(joy_l_trigger > 0 )
+    else if(left_trig > 0)
     {
-        conveyer.data = mapminmax(joy_l_trigger, 1.0, 0.0, (-1 *maxConveyerSpeed), 0.0);
+        conveyer.data = -left_trig*maxConveyerSpeed;
     }
 
     //Check for dpad buttons to run the dump
