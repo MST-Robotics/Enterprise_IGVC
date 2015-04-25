@@ -1,0 +1,10 @@
+<launch>
+    <!-- conect to the specified master  -->
+    <env name="ROS_MASTER_URI" value="http://jetson:11311" />
+    
+    <!-- launch joy package-->
+    <node pkg="joy" type="joy_node" name="joy_node" respawn="true">
+        <param name="deadzone" value=".1"/>
+    </node>
+    
+</launch>
