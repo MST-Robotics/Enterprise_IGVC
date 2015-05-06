@@ -24,31 +24,22 @@ const float maxConveyerSpeed = 225;
 void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     std_msgs::Int16 conveyer;
     std_msgs::Int8 dump;
-    
-    conveyer.data = 0;
-    
-    float left_trig = (joy->axes[2] * (-1) + 1)/2;
-    float right_trig = (joy->axes[5] * (-1) + 1)/2;
+        
+    float left_trig = (joy->axes[2] * (-1.0) + 1.0)/2.0;
+    float right_trig = (joy->axes[5] * (-1.0) + 1.0)/2.0;
     
     //Check for triggers to run the conveyer
-    if(right_trig > 0)
+    if(right_trig > .05)
     {
         conveyer.data = right_trig*maxConveyerSpeed;
     }
-    else if(left_trig > 0)
+    else if(left_trig > .05)
     {
         conveyer.data = -left_trig*maxConveyerSpeed;
     }
 
-    //Check for dpad buttons to run the dump
-    if(joy->buttons[joy_dpad_l])
-    {
-        dump.data = -1;
-    }
-    else if(joy->buttons[joy_dpad_r])
-    {
-        dump.data = 1;
-    }
+    //Check for dpad buttons to run the dump 
+    dump.data = -joy->axes[6]; 
 
     conveyer_pub.publish(conveyer);
     dump_pub.publish(dump);

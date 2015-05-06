@@ -19,10 +19,10 @@
 
 //#include <Wire.h>
 
-const int PIN_DUMP_UP1 = 31;
-const int PIN_DUMP_UP2 = 35;
-const int PIN_DUMP_DOWN1 = 33;
-const int PIN_DUMP_DOWN2 = 37;
+const int PIN_DUMP_UP1 = 29;
+const int PIN_DUMP_UP2 = 25;
+const int PIN_DUMP_DOWN1 = 27;
+const int PIN_DUMP_DOWN2 = 23;
 
 
 /*******************************************************************************
@@ -130,6 +130,13 @@ ros::Subscriber<std_msgs::Int8> dumpSub("dump", &DumpCallback);
 
 // Callback for Velocity, gets the left and right wheel velocity and direction
 void VelocityCallback(const control::Velocity &msg) {
+  /*
+  Serial.print("Left Velocity: ");
+  Serial.print(msg.left_vel);    
+  Serial.print(" Right Velocity: ");
+  Serial.print(msg.right_vel);
+  Serial.print("\n");
+  */
   //Left motor not being used
   if(msg.left_vel == 0)
   {
@@ -373,6 +380,7 @@ void setup() {
     Wire.write(0x02); //select mode register
     Wire.write(0x00); //continuos measurement
     Wire.endTransmission();*/
+    //Serial.begin(9600);
 }
 
 
@@ -384,5 +392,6 @@ void loop() {
     nodeHandle.spinOnce();
     //updateIMU();
     updateLight();
+//    delay(50);
 }
 
