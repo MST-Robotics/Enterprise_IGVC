@@ -7,4 +7,8 @@
         <param name="deadzone" value=".1"/>
     </node>
     
+    <!-- launch stopService Node-->
+    <node pkg="control" type="stopService" name="stopService" />
+
+    
 </launch>

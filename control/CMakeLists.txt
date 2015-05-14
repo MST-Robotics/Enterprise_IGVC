@@ -11,6 +11,7 @@ find_package(catkin REQUIRED
   sensor_msgs
   nav_msgs
   sound_play
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -115,11 +116,13 @@ include_directories(
 ## Declare a cpp executable
 add_executable(control src/control.cpp)
 add_executable(moon_control src/moonshot.cpp)
+add_executable(stopService src/stopService.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(control control_gencpp control_gencfg)
 add_dependencies(moon_control moon_control_gencpp moon_control_gencfg)
+add_dependencies(stopService stopService_gencpp stopService_gencfg)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(control
@@ -127,6 +130,10 @@ target_link_libraries(control
 )
 
 target_link_libraries(moon_control
+   ${catkin_LIBRARIES}
+)
+
+target_link_libraries(stopService
    ${catkin_LIBRARIES}
 )
 
