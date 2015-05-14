@@ -134,6 +134,8 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     switch (robot_mode) {
     case arcade_mode:
 
+        stop = false;
+
         check_shift(joy);
 
         // send the updated velocity to the motor controller
@@ -149,6 +151,8 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
 
     case diff_mode:
 
+        stop = false;
+        
         check_shift(joy);
 
         // send the updated velocity to the motor controller
@@ -162,6 +166,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     case autonomous:
     case standby:
         //Check to see if the mode should be changed
+        stop = true;
         check_mode(joy);
         break;
     }
@@ -245,7 +250,7 @@ int main(int argc, char **argv) {
             robot_init = false;
         }
 
-        if (robot_mode == standby)
+        if (stop)
             stop_robot();
 
         //Wait until the 30Hz interval has ended

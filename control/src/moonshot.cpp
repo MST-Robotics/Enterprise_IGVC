@@ -30,26 +30,36 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     float left_trig = (joy->axes[2] * (-1) + 1)/2;
     float right_trig = (joy->axes[5] * (-1) + 1)/2;
     
-    //Check for triggers to run the conveyer
-    if(right_trig > 0)
+    if(!stop)
     {
-        conveyer.data = right_trig*maxConveyerSpeed;
-    }
-    else if(left_trig > 0)
-    {
-        conveyer.data = -left_trig*maxConveyerSpeed;
-    }
+        //Check for triggers to run the conveyer
+        if(right_trig > 0)
+        {
+            conveyer.data = right_trig*maxConveyerSpeed;
+        }
+        else if(left_trig > 0)
+        {
+            conveyer.data = -left_trig*maxConveyerSpeed;
+        }
 
-    //Check for dpad buttons to run the dump
-    if(joy->buttons[joy_dpad_l])
-    {
-        dump.data = -1;
+        //Check for dpad buttons to run the dump
+        if(joy->buttons[joy_dpad_l])
+        {
+            dump.data = -1;
+        }
+        else if(joy->buttons[joy_dpad_r])
+        {
+            dump.data = 1;
+        }
     }
-    else if(joy->buttons[joy_dpad_r])
+    else
     {
-        dump.data = 1;
+        conveyer.data = 0;
+        
+        //This is where you put things to stop the robot.  You could also do it 
+        //in control, up to you
     }
-
+    
     conveyer_pub.publish(conveyer);
     dump_pub.publish(dump);
 }

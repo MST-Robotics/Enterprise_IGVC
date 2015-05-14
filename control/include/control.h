@@ -136,6 +136,7 @@ control::Control_ParamsConfig params;
 bool xtogg[30];
 bool robot_init;
 bool done_togg = 0;
+bool stop = true;
 int last_msg_waypoint = 0;
 float speed_mult = 0.4f;	//Speed multiplier for robot, shifts up and down
 
