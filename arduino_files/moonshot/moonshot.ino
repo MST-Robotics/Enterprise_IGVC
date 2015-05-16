@@ -79,7 +79,7 @@ ros::Subscriber<std_msgs::Int16> conveyerSub("conveyer", &ConveyerCallback);
 ros::Subscriber<std_msgs::Int8> dumpSub("dump", &DumpCallback);
 
 // Ros Subscriber for Estop messages
-ros::Subscriber<std_msgs::Bool> hardStopSub("stopService", &HardStopCallback);
+ros::Subscriber<std_msgs::Bool> hardStopSub("hardStop", &HardStopCallback);
 
 /*******************************************************************************
  * Callbacks
@@ -291,7 +291,6 @@ void setup() {
    
     
     // Setup ROS node and topics
-    nh.getHardware()->setBaud(115200);
     nh.initNode();
     nh.subscribe(velocitySub);
     nh.subscribe(conveyerSub);

@@ -1,7 +1,7 @@
 /**
  * @file moonshot.cpp
  * @author Matt Anderson <mia2n4>
- * @author Ryan Loeffelman <rjlt3c>
+ * @author  Ryan Loeffelman <rjlt3c>
  * @brief The control node for moonshot
  */
 
@@ -110,12 +110,12 @@ int main(int argc, char **argv) {
     joy_sub = n.subscribe<sensor_msgs::Joy>(TOPIC_JOY, 1, joy_callback);
 
     //Create publishers
-    conveyer_pub = n.advertise<std_msgs::Int8>(TOPIC_CONVEYER, 1);
+    conveyer_pub = n.advertise<std_msgs::Int16>(TOPIC_CONVEYER, 1);
     dump_pub = n.advertise<std_msgs::Int8>(TOPIC_DUMP, 1);
     hardStop_pub = n.advertise<std_msgs::Bool>(TOPIC_HARDSTOP, 1);
 
     //Set ros loop rate to 30Hz
-    ros::Rate loop_rate(15);
+    ros::Rate loop_rate(30);
 
 //repeate as long as ros is running
     //while(ros::ok())
