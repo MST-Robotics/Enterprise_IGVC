@@ -16,6 +16,7 @@
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Int8.h>
+#include <std_msgs/Bool.h>
 
 //#include <Wire.h>
 
@@ -58,6 +59,7 @@ float rightSpeedScaled;
 void VelocityCallback(const control::Velocity &msg);
 void ConveyerCallback(const std_msgs::Int16 &msg);
 void DumpCallback(const std_msgs::Int8 &msg);
+void HardStopCallback(const std_msgs::Bool &msg);
 
 /*******************************************************************************
  * Variables
@@ -74,6 +76,9 @@ ros::Subscriber<std_msgs::Int16> conveyerSub("conveyer", &ConveyerCallback);
 
 // Ros Subscriber for Dump messages
 ros::Subscriber<std_msgs::Int8> dumpSub("dump", &DumpCallback);
+
+// Ros Subscriber for Estop messages
+ros::Subscriber<std_msgs::Bool> hardStopSub("stopService", &HardStopCallback);
 
 /*******************************************************************************
  * Callbacks
@@ -213,7 +218,42 @@ void DumpCallback(const std_msgs::Int8 &msg)
     }
 }
 
-
+void HardStopCallback(const std_msgs::Bool &msg)
+{
+  if(msg.data)
+  {
+    //all enables low, write 0 to all analogWrite() pins
+    //switch relay on!
+    //this section turns dump off
+     digitalWrite(PIN_DUMP_UP1, HIGH);
+     digitalWrite(PIN_DUMP_UP2, HIGH);
+     digitalWrite(PIN_DUMP_DOWN1, HIGH);
+     digitalWrite(PIN_DUMP_DOWN2, HIGH);
+     
+     
+     //this section writes 0 to all analogWrite pins
+     analogWrite(PIN1_SET_FL,0);
+     analogWrite(PIN2_SET_FL,0);
+     analogWrite(PIN1_SET_FR,0);
+     analogWrite(PIN2_SET_FR,0);
+     analogWrite(PIN1_SET_BL,0);
+     analogWrite(PIN2_SET_BL,0);
+     analogWrite(PIN1_SET_BR,0);
+     analogWrite(PIN2_SET_BR,0);
+     analogWrite(PIN1_SET_CON,0);
+     analogWrite(PIN2_SET_CON,0);
+     
+     //this section turns off enables
+     digitalWrite(PIN_ENABLE_FL,LOW);
+     digitalWrite(PIN_ENABLE_FR,LOW);
+     digitalWrite(PIN_ENABLE_BL,LOW);
+     digitalWrite(PIN_ENABLE_BR,LOW);
+     digitalWrite(PIN_ENABLE_CON,LOW);
+     
+     //this section turns the relay on
+     
+  }
+}
 
 /*******************************************************************************
  * Initial Arduino Setup
@@ -253,7 +293,8 @@ void setup() {
     nodeHandle.initNode();
     nodeHandle.subscribe(velocitySub);
     nodeHandle.subscribe(conveyerSub);
-    nodeHandle.subscribe(dumpSub);    
+    nodeHandle.subscribe(dumpSub);  
+    nodeHandle.subscribe(hardStopSub);  
     
     //nodeHandle.getHardware()->setBaud(115200);
     //SerialUSB.begin(115200);

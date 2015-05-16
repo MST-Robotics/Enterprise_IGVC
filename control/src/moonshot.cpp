@@ -61,7 +61,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     {
 		freeze = true;
     }
-    else if(joy->buttons[2] == 1)
+    else if(joy->buttons[2estop] == 1)
 	{
 		freeze = false;
 	}
