@@ -19,6 +19,7 @@
 #include <std_msgs/Bool.h>
 
 //#include <Wire.h>
+ros::NodeHandle nh;
 
 const int PIN_DUMP_UP1 = 29;
 const int PIN_DUMP_UP2 = 25;
@@ -290,11 +291,12 @@ void setup() {
    
     
     // Setup ROS node and topics
-    nodeHandle.initNode();
-    nodeHandle.subscribe(velocitySub);
-    nodeHandle.subscribe(conveyerSub);
-    nodeHandle.subscribe(dumpSub);  
-    nodeHandle.subscribe(hardStopSub);  
+    nh.getHardware()->setBaud(115200);
+    nh.initNode();
+    nh.subscribe(velocitySub);
+    nh.subscribe(conveyerSub);
+    nh.subscribe(dumpSub);  
+    nh.subscribe(hardStopSub);  
     
     //nodeHandle.getHardware()->setBaud(115200);
     //SerialUSB.begin(115200);
@@ -306,7 +308,7 @@ void setup() {
  ******Serial*************************************************************************/
 
 void loop() {
-    nodeHandle.spinOnce();
-//    delay(50);
+    nh.spinOnce();
+    //delay(500);
 }
 

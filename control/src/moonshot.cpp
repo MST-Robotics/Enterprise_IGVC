@@ -1,6 +1,7 @@
 /**
  * @file moonshot.cpp
- * @author Matt Anderson <mia2n4>, Ryan Loeffelman <rjlt3c>
+ * @author Matt Anderson <mia2n4>
+ * @author Ryan Loeffelman <rjlt3c>
  * @brief The control node for moonshot
  */
 
@@ -61,7 +62,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     {
 		freeze = true;
     }
-    else if(joy->buttons[2estop] == 1)
+    else if(joy->buttons[2] == 1)
 	{
 		freeze = false;
 	}
@@ -109,7 +110,7 @@ int main(int argc, char **argv) {
     joy_sub = n.subscribe<sensor_msgs::Joy>(TOPIC_JOY, 1, joy_callback);
 
     //Create publishers
-    conveyer_pub = n.advertise<std_msgs::Int16>(TOPIC_CONVEYER, 1);
+    conveyer_pub = n.advertise<std_msgs::Int8>(TOPIC_CONVEYER, 1);
     dump_pub = n.advertise<std_msgs::Int8>(TOPIC_DUMP, 1);
     hardStop_pub = n.advertise<std_msgs::Bool>(TOPIC_HARDSTOP, 1);
 
@@ -117,8 +118,9 @@ int main(int argc, char **argv) {
     ros::Rate loop_rate(15);
 
 //repeate as long as ros is running
-    do
-    {
+    //while(ros::ok())
+	do    
+	{
 		//if the compputer dissconects the send an error msg to the screen and freeze robot
         if(!client.call(srv))
         {
@@ -140,6 +142,7 @@ int main(int argc, char **argv) {
 		//update ros    
         ros::spinOnce();
         
+		//loop_rate.sleep();
     }while(ros::ok());
     
     return 0;
