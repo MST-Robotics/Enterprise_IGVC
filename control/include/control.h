@@ -74,6 +74,7 @@ const uint8_t MOTOR_SPEED_MAX = 255;
 
 const float ROTATION_MAX = (1.0f + ROBOT_BASE / 2.0f) / WHEEL_RADIUS;
 const float ROTATION_MIN = -ROTATION_MAX;
+const float dead_reckoning = 20.0;
 
 /*-----------------------------------
 	Velocity and sensor data variables

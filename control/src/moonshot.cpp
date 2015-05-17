@@ -41,8 +41,21 @@ void estop()
  ******************************************************************************/
 void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
 
-    float left_trig = (joy->axes[2] * (-1.0) + 1.0)/2.0;
-    float right_trig = (joy->axes[5] * (-1.0) + 1.0)/2.0;  
+    float left_trig;
+    float right_trig;
+
+    if(joy->axes[2] > dead_reckoning || joy->axes[5] > dead_reckoning)
+    {
+
+       left_trig = (joy->axes[2] * (-1.0) + 1.0)/2.0;
+       right_trig = (joy->axes[5] * (-1.0) + 1.0)/2.0;
+    
+    }
+    else
+    {
+       left_trig = 0;
+       right_trig = 0;
+    }
 
     conveyer.data = 0;
     dump.data = 0;  
