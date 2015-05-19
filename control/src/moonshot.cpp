@@ -1,6 +1,7 @@
 /**
  * @file moonshot.cpp
- * @author Matt Anderson <mia2n4>, Ryan Loeffelman <rjlt3c>
+ * @author Matt Anderson <mia2n4>
+ * @author  Ryan Loeffelman <rjlt3c>
  * @brief The control node for moonshot
  */
 
@@ -15,14 +16,23 @@ ros::Publisher conveyer_pub;
 ros::Publisher dump_pub;
 ros::Publisher hardStop_pub;
 const float maxConveyerSpeed = 225;
+//check to see if robot should be frozen
+bool freeze = false;
 
 std_msgs::Int16 conveyer;
 std_msgs::Int8 dump;
 std_msgs::Bool hardStop;
 //Store controller data to send to arduino 
 
+/*******************************************************************************
+ * @fn estop()
+ * @brief cease's all action if the robot is told to break
+ * @post The Robot will cease all action upon calling this function
+ ******************************************************************************/
 void estop()
 {
+        //This is where you put things to stop the robot.  You could also do it 
+        //in control, up to you
     conveyer.data = 0;
     dump.data = 0;
     
@@ -61,14 +71,24 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     conveyer.data = 0;
     dump.data = 0;  
 
-    if(!stop)
+	//Checks to see if the stop button on the controller has been pressed
+    if(joy->buttons[1] == 1)
     {
+		freeze = true;
+    }
+    else if(joy->buttons[2] == 1)
+	{
+		freeze = false;
+	}
 
-		//Check for dpad buttons to run the dump 
+	//if the above button has been pressed, then freeze robot
+    if(!freeze)
+    {
+	//Check for dpad buttons to run the dump 
     	dump.data = -joy->axes[6];
  
         //Check for triggers to run the conveyer
-        if(right_trig >.05)
+        if(right_trig >0.05)
         {
             conveyer.data = right_trig*maxConveyerSpeed;
         }
@@ -76,19 +96,10 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
         {
             conveyer.data = -left_trig*maxConveyerSpeed;
         }
-
-        //Check for dpad buttons to run the dump
-        if(joy->buttons[joy_dpad_l])
-        {
-            dump.data = -1;
-        }
     }
     else
     {
         estop();
-        
-        //This is where you put things to stop the robot.  You could also do it 
-        //in control, up to you
     }
 
     conveyer_pub.publish(conveyer);
@@ -106,6 +117,7 @@ int main(int argc, char **argv) {
     ros::Subscriber joy_sub;
     ros::ServiceClient client = n.serviceClient<std_srvs::Empty>("stopService");
     std_srvs::Empty srv;
+    bool errorMsg = false;
     
 
     //Create subscriptions
@@ -117,18 +129,34 @@ int main(int argc, char **argv) {
     hardStop_pub = n.advertise<std_msgs::Bool>(TOPIC_HARDSTOP, 1);
 
     //Set ros loop rate to 30Hz
-    ros::Rate loop_rate(15);
+    ros::Rate loop_rate(30);
 
-    do
-    {
+//repeate as long as ros is running
+    //while(ros::ok())
+	do    
+	{
+		//if the compputer dissconects the send an error msg to the screen and freeze robot
         if(!client.call(srv))
         {
-            ROS_ERROR("Computer has disconected from robot!");
-            estop();
+	    	if(!errorMsg)
+	    	{
+            	ROS_ERROR("Computer has disconected from robot!");
+				errorMsg = true;
+	    	}
+            	estop();
         }
-        
+
+		//as long as its connected, say so
+		else if(errorMsg)
+		{
+	    	ROS_INFO("Computer Connected");
+	   		errorMsg = false;
+		}
+    
+		//update ros    
         ros::spinOnce();
         
+		//loop_rate.sleep();
     }while(ros::ok());
     
     return 0;

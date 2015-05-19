@@ -133,7 +133,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
        //joy_l_trigger = 0;
     }
 
-    // Say stuff when you press the d-pad buttons
+    /*// Say stuff when you press the d-pad buttons
     if (check_togg(joy->buttons[joy_dpad_up], joy_dpad_up))
     {
 	sc->say("My name is Enterprise");
@@ -149,7 +149,7 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     else if (check_togg(joy->buttons[joy_dpad_r], joy_dpad_r))
     {
 	sc->say(" Hello");
-    }
+    }*/
 
     switch (robot_mode) {
     case arcade_mode:
