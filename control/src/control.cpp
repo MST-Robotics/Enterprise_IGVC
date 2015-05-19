@@ -65,6 +65,13 @@ void check_shift(const sensor_msgs::Joy::ConstPtr& joy) {
 }
 
 void update_velocity(float right_vel, float left_vel) {
+	
+	stringstream s;
+	string str;
+	s << "update_velocity(" << right_vel <<","<< left_vel <<")";
+	s >> str;
+	ROS_ERROR(str.c_str());
+	s.str("");
 
     control::Velocity velocity;
 
@@ -122,6 +129,35 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
 
        joy_r_trigger = joy->axes[5];
        joy_l_trigger = joy->axes[2];
+
+	ROS_ERROR("Joystick Rightstick Vals input:");
+	ROS_ERROR("X:");
+	stringstream s;
+	string str;
+	//s << joy_rightstick_x;
+	s << joy->axes[4];
+	s >> str;
+	ROS_ERROR(str.c_str());
+	s.str("");
+	ROS_ERROR("Y:");
+	//s << joy_rightstick_y;
+	s << joy->axes[3];
+	s >> str;
+	ROS_ERROR(str.c_str());
+	s.str("");
+	ROS_ERROR("X:");
+	//s << joy_leftstick_x;
+	s << joy->axes[1];
+	s >> str;
+	ROS_ERROR(str.c_str());
+	s.str("");
+	ROS_ERROR("Y:");
+	//s << joy_leftstick_y;
+	s << joy->axes[0];
+	s >> str;
+	ROS_ERROR(str.c_str());
+	s.str("");
+
    // }
    // else
    // {

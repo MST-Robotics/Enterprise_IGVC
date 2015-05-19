@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
     hardStop_pub = n.advertise<std_msgs::Bool>(TOPIC_HARDSTOP, 1);
 
     //Set ros loop rate to 30Hz
-    ros::Rate loop_rate(30);
+    ros::Rate loop_rate(15);
 
 //repeate as long as ros is running
     //while(ros::ok())
