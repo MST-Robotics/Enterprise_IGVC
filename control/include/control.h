@@ -74,7 +74,10 @@ const uint8_t MOTOR_SPEED_MAX = 255;
 
 const float ROTATION_MAX = (1.0f + ROBOT_BASE / 2.0f) / WHEEL_RADIUS;
 const float ROTATION_MIN = -ROTATION_MAX;
-const float dead_reckoning = 20.0;
+
+//Values used to minimize the contoler response when nothing is pressed
+const float DEADZONE_JOYSTICK = 10;
+const float DEADZONE_TRIGGER = .1;
 
 /*-----------------------------------
 	Velocity and sensor data variables

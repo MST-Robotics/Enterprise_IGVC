@@ -103,29 +103,34 @@ float get_left_velocity(float linearVelocity, float angularVelocity) {
 void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     //Xbox buttons are defined in the header
     
-    if(joy->axes[0] > dead_reckoning || joy->axes[1] > dead_reckoning|| joy->axes[2] > dead_reckoning || joy->axes[3] > dead_reckoning || joy->axes[4] > dead_reckoning || joy->axes[5] > dead_reckoning)
+    if(abs(joy->axes[1]) > DEADZONE_JOYSTICK || 
+       abs(joy->axes[4]) > DEADZONE_JOYSTICK) 
+       //joy->axes[0] > DEADZONE_JOYSTICK || 
+       //joy->axes[3] > DEADZONE_JOYSTICK || 
+       //joy->axes[2] > DEADZONE_TRIGGER ||
+       //joy->axes[5] > DEADZONE_TRIGGER)
     {
 
        //xbox controller axes
        joy_rightstick_x = joy->axes[4];
-       joy_rightstick_y = joy->axes[3];
+       //joy_rightstick_y = joy->axes[3];
 
        joy_leftstick_x = joy->axes[1];
-       joy_leftstick_y = joy->axes[0];
+       //joy_leftstick_y = joy->axes[0];
 
-       joy_r_trigger = joy->axes[5];
-       joy_l_trigger = joy->axes[2];
+       //joy_r_trigger = joy->axes[5];
+       //joy_l_trigger = joy->axes[2];
     }
     else
     {
        joy_rightstick_x = 0;
-       joy_rightstick_y = 0;
+       //joy_rightstick_y = 0;
        
        joy_leftstick_x = 0;
-       joy_leftstick_y = 0;
+       //joy_leftstick_y = 0;
        
-       joy_r_trigger = 0;
-       joy_l_trigger = 0;
+       //joy_r_trigger = 0;
+       //joy_l_trigger = 0;
     }
 
     // Say stuff when you press the d-pad buttons

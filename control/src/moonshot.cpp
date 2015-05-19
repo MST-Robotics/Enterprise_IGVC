@@ -44,7 +44,8 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     float left_trig;
     float right_trig;
 
-    if(joy->axes[2] > dead_reckoning || joy->axes[5] > dead_reckoning)
+    if(joy->axes[2] < (1-DEADZONE_TRIGGER) ||
+       joy->axes[5] < (1-DEADZONE_TRIGGER))
     {
 
        left_trig = (joy->axes[2] * (-1.0) + 1.0)/2.0;
