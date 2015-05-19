@@ -19,15 +19,10 @@
 #include <std_msgs/Int16.h>
 #include <std_msgs/Int8.h>
 #include <std_msgs/Bool.h>
-<<<<<<< HEAD
-//#include <Wire.h>
-ros::NodeHandle nh;
-=======
 
 //#include <Wire.h>
 ros::NodeHandle nh;
 
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 const int PIN_DUMP_UP1 = 29;
 const int PIN_DUMP_UP2 = 25;
 const int PIN_DUMP_DOWN1 = 27;
@@ -51,18 +46,11 @@ const int PIN1_SET_BR = 8;
 const int PIN2_SET_BR = 9;
 const int PIN1_SET_CON = 10;
 const int PIN2_SET_CON = 11;
-<<<<<<< HEAD
-const int maxSpeed = 225;
-float leftSpeedScaled;
-float rightSpeedScaled;
-=======
-
 
 const  int maxSpeed = 225;
 float leftSpeedScaled;
 float rightSpeedScaled;
 
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 /*******************************************************************************
 * Forward delerations
 *******************************************************************************/
@@ -70,7 +58,7 @@ void VelocityCallback(const control::Velocity &msg);
 void ConveyerCallback(const std_msgs::Int16 &msg);
 void DumpCallback(const std_msgs::Int8 &msg);
 void HardStopCallback(const std_msgs::Bool &msg);
-<<<<<<< HEAD
+
 /*******************************************************************************
 * Variables
 *******************************************************************************/
@@ -78,38 +66,24 @@ void HardStopCallback(const std_msgs::Bool &msg);
 ros::NodeHandle nodeHandle;
 // ROS Subscriber for Velocity messages
 ros::Subscriber<control::Velocity> velocitySub("cmd_vel", &VelocityCallback);
-=======
 
 /*******************************************************************************
  * Variables
  *******************************************************************************/
 
-// ROS node handle
-ros::NodeHandle nodeHandle;
-
-// ROS Subscriber for Velocity messages
-ros::Subscriber<control::Velocity> velocitySub("cmd_vel", &VelocityCallback);
-
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 // ROS Subscriber for Conveyer messages
 ros::Subscriber<std_msgs::Int16> conveyerSub("conveyer", &ConveyerCallback);
 // Ros Subscriber for Dump messages
 ros::Subscriber<std_msgs::Int8> dumpSub("dump", &DumpCallback);
-<<<<<<< HEAD
-// Ros Subscriber for Estop messages
-ros::Subscriber<std_msgs::Bool> hardStopSub("hardStop", &HardStopCallback);
-=======
 
 // Ros Subscriber for Estop messages
 ros::Subscriber<std_msgs::Bool> hardStopSub("hardStop", &HardStopCallback);
 
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 /*******************************************************************************
 * Callbacks
 *******************************************************************************/
 // Callback for Velocity, gets the left and right wheel velocity and direction
 void VelocityCallback(const control::Velocity &msg) {
-<<<<<<< HEAD
 /*
 SerialUSB.print("VelocityCallback has been run\n");
 SerialUSB.print("Left Velocity: ");
@@ -203,168 +177,9 @@ analogWrite(PIN1_SET_CON, 0);
 analogWrite(PIN2_SET_CON, msg.data);
 }
 }
-=======
-  
-  /*
-  SerialUSB.print("VelocityCallback has been run\n");
-  SerialUSB.print("Left Velocity: ");
-  SerialUSB.print(msg.left_vel);    
-  SerialUSB.print(" Right Velocity: ");
-  SerialUSB.print(msg.right_vel);
-  SerialUSB.print("\n");
- */
- 
-  //Left motor not being used
-  if(msg.left_vel == 0)
-  {
-    digitalWrite(PIN_ENABLE_FL, LOW);
-    digitalWrite(PIN_ENABLE_BL, LOW);
-  }
-  //Compute direction and velocities of left motors
-  else
-  {
-    leftSpeedScaled = map(msg.left_vel,0,255,0,maxSpeed);
-    digitalWrite(PIN_ENABLE_FL, HIGH);
-    digitalWrite(PIN_ENABLE_BL, HIGH);
-    if(!msg.left_dir)
-    {
-      analogWrite(PIN1_SET_FL, leftSpeedScaled);
-      analogWrite(PIN2_SET_FL, 0);
-      analogWrite(PIN1_SET_BL, leftSpeedScaled);
-      analogWrite(PIN2_SET_BL, 0);
-    }
-    else
-    {
-      analogWrite(PIN1_SET_FL, 0);
-      analogWrite(PIN2_SET_FL, leftSpeedScaled);
-      analogWrite(PIN1_SET_BL, 0);
-      analogWrite(PIN2_SET_BL, leftSpeedScaled);
-    }
-  }
-  
-  //Right motor not being used
-  if(msg.right_vel == 0)
-  {
-    digitalWrite(PIN_ENABLE_FR, LOW);
-    digitalWrite(PIN_ENABLE_BR, LOW);
-  }
-  //Compute direction and velocities of left motors
-  else
-  {
-    rightSpeedScaled = map(msg.right_vel,0,255,0,maxSpeed);
-    digitalWrite(PIN_ENABLE_FR, HIGH);
-    digitalWrite(PIN_ENABLE_BR, HIGH);
-    if(!msg.right_dir)
-    {
-      analogWrite(PIN1_SET_FR, rightSpeedScaled);
-      analogWrite(PIN2_SET_FR, 0);
-      analogWrite(PIN1_SET_BR, rightSpeedScaled);
-      analogWrite(PIN2_SET_BR, 0);
-    }
-    else
-    {
-      analogWrite(PIN1_SET_FR, 0);
-      analogWrite(PIN2_SET_FR, rightSpeedScaled);
-      analogWrite(PIN1_SET_BR, 0);
-      analogWrite(PIN2_SET_BR, rightSpeedScaled);
-    }
-  }
-}
-
-/*
-// Callback from light msg, changes mode of the light
-void LightCallback(const std_msgs::UInt8 &msg) {
-    SerialUSB.print("LightCallback has been run\n");
-    lightMode = msg.data;
-}
-*/
-
-// Callback from conveyer msg, runs the conveyer
-void ConveyerCallback(const std_msgs::Int16 &msg) {
-    //Left motor not being used
-    //SerialUSB.print("ConveyerCallback has been run\n");
-    if(msg.data == 0)
-    {
-        digitalWrite(PIN_ENABLE_CON, LOW);
-    }
-    //Compute direction and velocities of left motors
-    else
-    {
-        digitalWrite(PIN_ENABLE_CON, HIGH);
-        if(msg.data > 0)
-        {
-            analogWrite(PIN1_SET_CON, msg.data);
-            analogWrite(PIN2_SET_CON, 0);
-        }
-        else
-        {
-            analogWrite(PIN1_SET_CON, 0);
-            analogWrite(PIN2_SET_CON, msg.data);
-        }
-    }
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 }
 void DumpCallback(const std_msgs::Int8 &msg)
 {
-<<<<<<< HEAD
-//SerialUSB.print("DumpCallback has been run\n");
-switch(msg.data)
-{
-//Up
-case 1:
-digitalWrite(PIN_DUMP_UP1, LOW);
-digitalWrite(PIN_DUMP_UP2, LOW);
-digitalWrite(PIN_DUMP_DOWN1, HIGH);
-digitalWrite(PIN_DUMP_DOWN2, HIGH);
-break;
-//Down
-case -1:
-digitalWrite(PIN_DUMP_UP1, HIGH);
-digitalWrite(PIN_DUMP_UP2, HIGH);
-digitalWrite(PIN_DUMP_DOWN1, LOW);
-digitalWrite(PIN_DUMP_DOWN2, LOW);
-break;
-//off
-default:
-digitalWrite(PIN_DUMP_UP1, HIGH);
-digitalWrite(PIN_DUMP_UP2, HIGH);
-digitalWrite(PIN_DUMP_DOWN1, HIGH);
-digitalWrite(PIN_DUMP_DOWN2, HIGH);
-break;
-}
-}
-void HardStopCallback(const std_msgs::Bool &msg)
-{
-if(msg.data)
-{
-//all enables low, write 0 to all analogWrite() pins
-//switch relay on!
-//this section turns dump off
-digitalWrite(PIN_DUMP_UP1, HIGH);
-digitalWrite(PIN_DUMP_UP2, HIGH);
-digitalWrite(PIN_DUMP_DOWN1, HIGH);
-digitalWrite(PIN_DUMP_DOWN2, HIGH);
-//this section writes 0 to all analogWrite pins
-analogWrite(PIN1_SET_FL,0);
-analogWrite(PIN2_SET_FL,0);
-analogWrite(PIN1_SET_FR,0);
-analogWrite(PIN2_SET_FR,0);
-analogWrite(PIN1_SET_BL,0);
-analogWrite(PIN2_SET_BL,0);
-analogWrite(PIN1_SET_BR,0);
-analogWrite(PIN2_SET_BR,0);
-analogWrite(PIN1_SET_CON,0);
-analogWrite(PIN2_SET_CON,0);
-//this section turns off enables
-digitalWrite(PIN_ENABLE_FL,LOW);
-digitalWrite(PIN_ENABLE_FR,LOW);
-digitalWrite(PIN_ENABLE_BL,LOW);
-digitalWrite(PIN_ENABLE_BR,LOW);
-digitalWrite(PIN_ENABLE_CON,LOW);
-//this section turns the relay on
-}
-}
-=======
     //SerialUSB.print("DumpCallback has been run\n");
     switch(msg.data)
     {
@@ -432,45 +247,11 @@ void HardStopCallback(const std_msgs::Bool &msg)
   }
 }
 
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 /*******************************************************************************
 * Initial Arduino Setup
 *******************************************************************************/
 void setup() {
-<<<<<<< HEAD
-// Setup pins
-pinMode(PIN_ENABLE_FL, OUTPUT);
-pinMode(PIN_ENABLE_FR, OUTPUT);
-pinMode(PIN_ENABLE_BL, OUTPUT);
-pinMode(PIN_ENABLE_BR, OUTPUT);
-pinMode(PIN_ENABLE_CON, OUTPUT);
-pinMode(PIN1_SET_FL, OUTPUT);
-pinMode(PIN2_SET_FL, OUTPUT);
-pinMode(PIN1_SET_FR, OUTPUT);
-pinMode(PIN2_SET_FR, OUTPUT);
-pinMode(PIN1_SET_BL, OUTPUT);
-pinMode(PIN2_SET_BL, OUTPUT);
-pinMode(PIN1_SET_BR, OUTPUT);
-pinMode(PIN2_SET_BR, OUTPUT);
-pinMode(PIN1_SET_CON, OUTPUT);
-pinMode(PIN2_SET_CON, OUTPUT);
-pinMode(PIN_DUMP_UP1, OUTPUT);
-pinMode(PIN_DUMP_UP2, OUTPUT);
-pinMode(PIN_DUMP_DOWN1, OUTPUT);
-pinMode(PIN_DUMP_DOWN2, OUTPUT);
-digitalWrite(PIN_DUMP_UP1, HIGH);
-digitalWrite(PIN_DUMP_UP2, HIGH);
-digitalWrite(PIN_DUMP_DOWN1, HIGH);
-digitalWrite(PIN_DUMP_DOWN2, HIGH);
-// Setup ROS node and topics
-nh.initNode();
-nh.subscribe(velocitySub);
-nh.subscribe(conveyerSub);
-nh.subscribe(dumpSub);
-nh.subscribe(hardStopSub);
-//nodeHandle.getHardware()->setBaud(115200);
-//SerialUSB.begin(115200);
-=======
+
     // Setup pins
     pinMode(PIN_ENABLE_FL, OUTPUT);
     pinMode(PIN_ENABLE_FR, OUTPUT);
@@ -509,22 +290,12 @@ nh.subscribe(hardStopSub);
     
     //nodeHandle.getHardware()->setBaud(115200);
     //SerialUSB.begin(115200);
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 }
 /*******************************************************************************
-<<<<<<< HEAD
-* Main Arduino Loop
-******Serial*************************************************************************/
-void loop() {
-nh.spinOnce();
-//delay(500);
-=======
  * Main Arduino Loop
- ******Serial*************************************************************************/
+ *******************************************************************************/
 
 void loop() {
     nh.spinOnce();
-    //delay(500);
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 }
 

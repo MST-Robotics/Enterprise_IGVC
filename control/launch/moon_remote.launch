@@ -4,9 +4,7 @@
     
     <!-- launch joy package-->
     <node pkg="joy" type="joy_node" name="joy_node" respawn="true">
-        <param name="deadzone" value=".1"/>
-    </node>
-    
+
     <!-- launch stopService Node-->
     <node pkg="control" type="stopService" name="stopService" />
 

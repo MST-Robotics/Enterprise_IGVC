@@ -7,7 +7,7 @@
 * @author Matt Anderson <mia2n4>
 * @author Islam Elnabarawy <ie3md>
 * @author Ryan Loeffelman  <rjlt3c>
-* @version 1.0.1
+* &@version 1.0.1
 ******************************************************************************/
 
 #include <ros.h>

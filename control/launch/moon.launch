@@ -8,6 +8,6 @@
 
     <node pkg="control" type="moon_control" name="moon_control" required="true" output="screen"/> 
 
-	<node pkg="rosserial_python" type="serial_node.py" name="serial_node" args="/dev/ttyACM0" /> 
-    
+	<node pkg="rosserial_python" type="serial_node.py" name="serial_node" args="/dev/ttyACM0" />
+
 </launch>
