@@ -1,4 +1,4 @@
-/*******************************************************************************
+/******************************************************************************
  * @file string_constants.h
  * @author Islam Elnabarawy <ie3md>
  * @version 1.0
@@ -20,6 +20,4 @@ const char* TOPIC_INDICATOR_LIGHT = "indicator_light";
 const char* TOPIC_CONVEYER = "conveyer";
 const char* TOPIC_DUMP = "dump";
 const char* TOPIC_HARDSTOP = "hardStop";
-
-
 #endif /* COMMON_STRING_CONSTANTS_H_ */

@@ -6,11 +6,7 @@
 * https://www.sparkfun.com/products/10724.
 * @author Matt Anderson <mia2n4>
 * @author Islam Elnabarawy <ie3md>
-<<<<<<< HEAD
 * @author Ryan Loeffelman <rjlt3c>
-=======
-* @author Ryan Loeffelman  <rjlt3c>
->>>>>>> 65b1fec71950688e37292426eee2b9f9d00bad19
 * @version 1.0.1
 ******************************************************************************/
 #include <ros.h>
@@ -51,6 +47,9 @@ const  int maxSpeed = 225;
 float leftSpeedScaled;
 float rightSpeedScaled;
 
+const int estopPin = 38;
+//bool torque = false;
+
 /*******************************************************************************
 * Forward delerations
 *******************************************************************************/
@@ -58,6 +57,7 @@ void VelocityCallback(const control::Velocity &msg);
 void ConveyerCallback(const std_msgs::Int16 &msg);
 void DumpCallback(const std_msgs::Int8 &msg);
 void HardStopCallback(const std_msgs::Bool &msg);
+//void DiagCallback(const std_msgs::Bool &msg);
 
 /*******************************************************************************
 * Variables
@@ -78,86 +78,73 @@ ros::Subscriber<std_msgs::Int8> dumpSub("dump", &DumpCallback);
 
 // Ros Subscriber for Estop messages
 ros::Subscriber<std_msgs::Bool> hardStopSub("hardStop", &HardStopCallback);
+//ros::Subscriber<std_msgs::Bool> diagSub("diag", &DiagCallback);
 
 /*******************************************************************************
 * Callbacks
 *******************************************************************************/
 // Callback for Velocity, gets the left and right wheel velocity and direction
-void VelocityCallback(const control::Velocity &msg) {
-/*
-SerialUSB.print("VelocityCallback has been run\n");
-SerialUSB.print("Left Velocity: ");
-SerialUSB.print(msg.left_vel);
-SerialUSB.print(" Right Velocity: ");
-SerialUSB.print(msg.right_vel);
-SerialUSB.print("\n");
-*/
-//Left motor not being used
-if(msg.left_vel == 0)
+void VelocityCallback(const control::Velocity &msg) 
 {
-digitalWrite(PIN_ENABLE_FL, LOW);
-digitalWrite(PIN_ENABLE_BL, LOW);
+  //Left motor not being used
+  if(msg.left_vel == 0)
+  {
+    digitalWrite(PIN_ENABLE_FL, LOW);
+    digitalWrite(PIN_ENABLE_BL, LOW);
+  }
+    //Compute direction and velocities of left motors
+  else
+  { 
+    leftSpeedScaled = map(msg.left_vel,0,255,0,maxSpeed);
+    digitalWrite(PIN_ENABLE_FL, HIGH);
+    digitalWrite(PIN_ENABLE_BL, HIGH);
+    if(!msg.left_dir)
+    {   
+      analogWrite(PIN1_SET_FL, leftSpeedScaled);
+      analogWrite(PIN2_SET_FL, 0);
+      analogWrite(PIN1_SET_BL, leftSpeedScaled);  
+      analogWrite(PIN2_SET_BL, 0);
+    } 
+    else
+    {
+      analogWrite(PIN1_SET_FL, 0);
+      analogWrite(PIN2_SET_FL, leftSpeedScaled);
+      analogWrite(PIN1_SET_BL, 0);
+      analogWrite(PIN2_SET_BL, leftSpeedScaled);
+    }
+  }
+  //Right motor not being used
+  if(msg.right_vel == 0)
+  {
+    digitalWrite(PIN_ENABLE_FR, LOW);
+    digitalWrite(PIN_ENABLE_BR, LOW);
+  }
+  //Compute direction and velocities of left motors
+  else
+  {  
+    rightSpeedScaled = map(msg.right_vel,0,255,0,maxSpeed);
+    digitalWrite(PIN_ENABLE_FR, HIGH);
+    digitalWrite(PIN_ENABLE_BR, HIGH);
+    if(!msg.right_dir)
+    {
+      analogWrite(PIN1_SET_FR, rightSpeedScaled);
+      analogWrite(PIN2_SET_FR, 0);
+      analogWrite(PIN1_SET_BR, rightSpeedScaled);
+      analogWrite(PIN2_SET_BR, 0);
+    }
+    else
+    {    
+      analogWrite(PIN1_SET_FR, 0);
+      analogWrite(PIN2_SET_FR, rightSpeedScaled);
+      analogWrite(PIN1_SET_BR, 0);
+      analogWrite(PIN2_SET_BR, rightSpeedScaled);
+    }
+  }
 }
-//Compute direction and velocities of left motors
-else
-{
-leftSpeedScaled = map(msg.left_vel,0,255,0,maxSpeed);
-digitalWrite(PIN_ENABLE_FL, HIGH);
-digitalWrite(PIN_ENABLE_BL, HIGH);
-if(!msg.left_dir)
-{
-analogWrite(PIN1_SET_FL, leftSpeedScaled);
-analogWrite(PIN2_SET_FL, 0);
-analogWrite(PIN1_SET_BL, leftSpeedScaled);
-analogWrite(PIN2_SET_BL, 0);
-}
-else
-{
-analogWrite(PIN1_SET_FL, 0);
-analogWrite(PIN2_SET_FL, leftSpeedScaled);
-analogWrite(PIN1_SET_BL, 0);
-analogWrite(PIN2_SET_BL, leftSpeedScaled);
-}
-}
-//Right motor not being used
-if(msg.right_vel == 0)
-{
-digitalWrite(PIN_ENABLE_FR, LOW);
-digitalWrite(PIN_ENABLE_BR, LOW);
-}
-//Compute direction and velocities of left motors
-else
-{
-rightSpeedScaled = map(msg.right_vel,0,255,0,maxSpeed);
-digitalWrite(PIN_ENABLE_FR, HIGH);
-digitalWrite(PIN_ENABLE_BR, HIGH);
-if(!msg.right_dir)
-{
-analogWrite(PIN1_SET_FR, rightSpeedScaled);
-analogWrite(PIN2_SET_FR, 0);
-analogWrite(PIN1_SET_BR, rightSpeedScaled);
-analogWrite(PIN2_SET_BR, 0);
-}
-else
-{
-analogWrite(PIN1_SET_FR, 0);
-analogWrite(PIN2_SET_FR, rightSpeedScaled);
-analogWrite(PIN1_SET_BR, 0);
-analogWrite(PIN2_SET_BR, rightSpeedScaled);
-}
-}
-}
-/*
-// Callback from light msg, changes mode of the light
-void LightCallback(const std_msgs::UInt8 &msg) {
-SerialUSB.print("LightCallback has been run\n");
-lightMode = msg.data;
-}
-*/
+
 // Callback from conveyer msg, runs the conveyer
 void ConveyerCallback(const std_msgs::Int16 &msg) {
 //Left motor not being used
-//SerialUSB.print("ConveyerCallback has been run\n");
 if(msg.data == 0)
 {
 digitalWrite(PIN_ENABLE_CON, LOW);
@@ -243,7 +230,11 @@ void HardStopCallback(const std_msgs::Bool &msg)
      digitalWrite(PIN_ENABLE_CON,LOW);
      
      //this section turns the relay on
-     
+     digitalWrite(estopPin, LOW);
+  }
+  else
+  {
+    digitalWrite(estopPin, HIGH);
   }
 }
 
@@ -279,6 +270,9 @@ void setup() {
     digitalWrite(PIN_DUMP_UP2, HIGH);
     digitalWrite(PIN_DUMP_DOWN1, HIGH);
     digitalWrite(PIN_DUMP_DOWN2, HIGH);
+    
+    pinMode(estopPin, OUTPUT);
+    digitalWrite(estopPin, HIGH);
    
     
     // Setup ROS node and topics
@@ -287,6 +281,7 @@ void setup() {
     nh.subscribe(conveyerSub);
     nh.subscribe(dumpSub);  
     nh.subscribe(hardStopSub);  
+    //nh.subscribe(diagSub);
     
     //nodeHandle.getHardware()->setBaud(115200);
     //SerialUSB.begin(115200);

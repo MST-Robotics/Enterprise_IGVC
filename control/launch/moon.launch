@@ -1,5 +1,5 @@
 <launch>
-    <!-- conect to the specified master  -->
+    <!--aa conect to the specified master  -->
     <env name="ROS_MASTER_URI" value="http://localhost:11311" />
 
     <node pkg="control" type="control" name="control" required="true" > 

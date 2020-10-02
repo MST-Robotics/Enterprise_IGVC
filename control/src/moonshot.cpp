@@ -15,6 +15,7 @@
 ros::Publisher conveyer_pub;
 ros::Publisher dump_pub;
 ros::Publisher hardStop_pub;
+
 const float maxConveyerSpeed = 225;
 //check to see if robot should be frozen
 bool freeze = false;
@@ -54,27 +55,27 @@ void joy_callback(const sensor_msgs::Joy::ConstPtr& joy) {
     float left_trig;
     float right_trig;
 
-    //if(joy->axes[2] < (1-DEADZONE_TRIGGER) ||
-    //   joy->axes[5] < (1-DEADZONE_TRIGGER))
-    //{
+    if(joy->axes[2] < (1-DEADZONE_TRIGGER) ||
+       joy->axes[5] < (1-DEADZONE_TRIGGER))
+    {
 
        left_trig = (joy->axes[2] * (-1.0) + 1.0)/2.0;
        right_trig = (joy->axes[5] * (-1.0) + 1.0)/2.0;
     
-    //}
-
+    }
+    
     conveyer.data = 0;
     dump.data = 0;  
-
+    
 	//Checks to see if the stop button on the controller has been pressed
     if(joy->buttons[1] == 1)
     {
-		freeze = true;
+	freeze = true;
     }
     else if(joy->buttons[2] == 1)
-	{
-		freeze = false;
-	}
+    {
+	freeze = false;
+    }
 
 	//if the above button has been pressed, then freeze robot
     if(!freeze)
@@ -127,32 +128,28 @@ int main(int argc, char **argv) {
     ros::Rate loop_rate(15);
 
 //repeate as long as ros is running
-    //while(ros::ok())
-	do    
-	{
-		//if the compputer dissconects the send an error msg to the screen and freeze robot
+    while(ros::ok())    
+    {
         if(!client.call(srv))
         {
-	    	if(!errorMsg)
-	    	{
+	    if(!errorMsg)
+	    {
             	ROS_ERROR("Computer has disconected from robot!");
-				errorMsg = true;
-	    	}
+		errorMsg = true;
+	    }
             	estop();
         }
-
-		//as long as its connected, say so
-		else if(errorMsg)
-		{
-	    	ROS_INFO("Computer Connected");
-	   		errorMsg = false;
-		}
+	else if(errorMsg)
+	{
+            ROS_INFO("Computer Connected");
+    	    errorMsg = false;
+	}
     
 		//update ros    
         ros::spinOnce();
         
 		//loop_rate.sleep();
-    }while(ros::ok());
+    }
     
     return 0;
 }
